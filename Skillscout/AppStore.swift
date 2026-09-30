@@ -20,6 +20,8 @@ final class AppStore {
   var busy: Set<String> = []
   var errorMessage: String?
   var searchRequests = 0
+  /// Copies waiting for you to confirm, before they go to the Trash.
+  var removal: Removal?
 
   @ObservationIgnored private let library = PromptLibrary()
   @ObservationIgnored private var allPrompts: [Prompt] = []
@@ -175,6 +177,15 @@ final class AppStore {
     } catch {
       errorMessage = error.localizedDescription
     }
+  }
+
+  func remove(_ copies: [SkillCopy]) async {
+    do {
+      try SkillInstaller.remove(copies)
+    } catch {
+      errorMessage = error.localizedDescription
+    }
+    await refreshSkills()
   }
 
   func draft(_ id: Suggestion.ID) async {

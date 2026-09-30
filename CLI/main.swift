@@ -9,7 +9,7 @@ struct Arguments {
   private var flags: Set<String> = []
   private var options: [String: String] = [:]
 
-  private static let valued: Set<String> = ["days", "tool", "to", "sort", "engine", "model"]
+  private static let valued: Set<String> = ["days", "tool", "to", "from", "sort", "engine", "model"]
 
   init(_ raw: [String]) throws {
     var queue = raw[...]
@@ -97,7 +97,7 @@ struct Arguments {
 }
 
 enum Command: String, CaseIterable {
-  case list, show, usage, tools, add, suggest, explain
+  case list, show, usage, tools, add, uninstall, suggest, explain
 
   var synopsis: String {
     switch self {
@@ -106,6 +106,7 @@ enum Command: String, CaseIterable {
     case .usage: "usage [options]"
     case .tools: "tools [options]"
     case .add: "add <skill> --to <tool> | --all"
+    case .uninstall: "uninstall <skill> [--from <tool>]"
     case .suggest: "suggest [options]"
     case .explain: "explain <skill> [options]"
     }
@@ -118,6 +119,7 @@ enum Command: String, CaseIterable {
     case .usage: "Rank skills by how many chats used them"
     case .tools: "The agent tools Skillscout knows about"
     case .add: "Add a skill to another tool"
+    case .uninstall: "Move a skill to the Trash"
     case .suggest: "Ask AI for skill ideas based on requests you repeat"
     case .explain: "Ask AI what a skill does"
     }
@@ -135,6 +137,8 @@ enum Command: String, CaseIterable {
       "Lists the agent tools Skillscout knows, whether they're on, and where each one keeps its skills. Turn tools on or off in the app's settings."
     case .add:
       "Makes a skill available in another tool. Skillscout links the skill folder into that tool's skills folder, so an edit shows up everywhere. Plugin skills get copied instead, since plugin updates replace their folders."
+    case .uninstall:
+      "Moves every copy of a skill in your skills folders to the Trash, so you can put it back from there. A link goes on its own, and the folder it points to stays. Plugin and built-in copies stay too, since their tools manage them."
     case .suggest:
       "Sends your recent messages to the Codex or Claude Code CLI and asks for skill ideas: requests you keep typing that a skill could handle. The run isn't saved to your chat history."
     case .explain:
@@ -166,6 +170,8 @@ enum Command: String, CaseIterable {
         ("--to <tool>", "The tool to add it to"),
         ("--all", "Add it to every tool you use that's missing it"),
       ]
+    case .uninstall:
+      return [("--from <tool>", "Only the copy in this tool's skills folder, and the links to it")]
     case .suggest:
       return engine + [days, json]
     case .explain:
@@ -184,6 +190,7 @@ enum Command: String, CaseIterable {
     case .usage: try await Commands.usage(args)
     case .tools: try await Commands.tools(args)
     case .add: try await Commands.add(args)
+    case .uninstall: try await Commands.uninstall(args)
     case .suggest: try await Commands.suggest(args)
     case .explain: try await Commands.explain(args)
     }

@@ -45,6 +45,7 @@ defaults write com.flaviocopes.skillscout AppUpdaterAutomaticChecks -bool false
 - Every skill from your agents in one list, with a row of icons showing which agents load it
 - **Missing somewhere** lists the skills at least one of your agents can't see
 - **Add to** links the skill folder into another agent's skills folder, so every agent loads the same file
+- **Uninstall** moves a skill to the Trash, from all your skills folders or from one of them
 - **Unused** lists the skills no chat touched in the last 60 days
 - Usage for each skill: how many chats, from which agents, in which projects, and when you last used it
 - The skills you created last come first, and you can sort by name or by use instead
@@ -94,6 +95,16 @@ Adding a skill creates a symbolic link to the skill folder inside that agent's s
 
 Plugin skills get copied instead of linked, because a plugin update replaces its folders.
 
+## Removing a skill
+
+Pick a skill and click **Uninstall this skill** under **Where it lives**. You can also right-click it in the list, or select it and press Delete. Skillscout moves every copy in your skills folders to the Trash, links included, so you can put it back from there.
+
+To take a skill away from some agents only, click **Remove** next to one of its folders. If other folders link to that one, the links go too, since they'd point to nothing. When you remove a link, the folder it points to stays.
+
+Before anything moves, Skillscout tells you which agents will stop loading the skill.
+
+Plugin and built-in skills stay where they are. Their agents manage them, so uninstall the plugin to remove its skills.
+
 ## Counting uses
 
 A use is a chat where the agent read the skill, or where you attached it yourself.
@@ -130,6 +141,7 @@ The command reads the same skills and chats as the app, and follows its settings
 | `skillscout usage` | Ranks skills by how many chats used them |
 | `skillscout tools` | The agents Skillscout knows, and where each one keeps its skills |
 | `skillscout add <skill> --to <tool>` | Adds a skill to another agent |
+| `skillscout uninstall <skill>` | Moves a skill to the Trash |
 | `skillscout suggest` | Asks AI for skill ideas based on requests you repeat |
 | `skillscout explain <skill>` | Asks AI what a skill does |
 
@@ -193,6 +205,12 @@ release-notes         12  4 days ago   Cursor 8, Gemini CLI 4
 
 ```sh
 skillscout add release-notes --all
+```
+
+`uninstall` moves every copy of a skill to the Trash. Pass `--from` with one agent to remove only the copy in that agent's skills folder, which undoes an `add`:
+
+```sh
+skillscout uninstall release-notes --from amp
 ```
 
 `suggest` and `explain` take `--engine codex` or `--engine claude`, and `--model` to pick the model. `explain` returns the app's saved explanation when there is one, and `--fresh` asks again.

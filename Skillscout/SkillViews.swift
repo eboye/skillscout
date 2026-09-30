@@ -1,12 +1,21 @@
 import SwiftUI
 
 struct SkillList: View {
+  @Environment(AppStore.self) private var store
   let skills: [Skill]
   @Binding var selection: Skill.ID?
 
   var body: some View {
     List(skills, selection: $selection) { skill in
       SkillRow(skill: skill)
+    }
+    .contextMenu(forSelectionType: Skill.ID.self) { ids in
+      if let skill = store.skill(ids.first), skill.isPersonal {
+        Button("Uninstall", role: .destructive) { store.removal = .uninstall(skill) }
+      }
+    }
+    .onDeleteCommand {
+      if let skill = store.skill(selection), skill.isPersonal { store.removal = .uninstall(skill) }
     }
     .overlay {
       if skills.isEmpty {
@@ -191,12 +200,23 @@ struct SkillDetail: View {
           Spacer()
           Button("Show in Finder") { Finder.reveal(copy.folder) }
             .buttonStyle(.link)
+          if skill.removableCopies.count > 1, skill.removableCopies.contains(copy) {
+            Button("Remove") { store.removal = .copy(copy, of: skill) }
+              .buttonStyle(.link)
+          }
         }
       }
       if skill.copiesDiffer {
         Label("These copies have different content, so editing one won't update the others.", systemImage: "exclamationmark.triangle.fill")
           .font(.callout)
           .foregroundStyle(.orange)
+      }
+      if skill.isPersonal {
+        Button("Uninstall this skill", role: .destructive) { store.removal = .uninstall(skill) }
+      } else if let plugin = skill.copies.first(where: { $0.root.kind == .plugin }) {
+        Text("It comes from the \(plugin.sourceLabel), so uninstall the plugin to remove it.")
+          .font(.callout)
+          .foregroundStyle(.secondary)
       }
     }
   }
@@ -212,5 +232,49 @@ struct SkillDetail: View {
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.5)))
     }
+  }
+}
+
+/// Copies of a skill on their way to the Trash, with the words that confirm it.
+struct Removal {
+  let skill: Skill
+  let copies: [SkillCopy]
+
+  static func uninstall(_ skill: Skill) -> Removal {
+    Removal(skill: skill, copies: skill.removableCopies)
+  }
+
+  static func copy(_ copy: SkillCopy, of skill: Skill) -> Removal {
+    Removal(skill: skill, copies: skill.copiesGoing(with: copy))
+  }
+
+  var title: String {
+    copies.count == skill.removableCopies.count
+      ? "Uninstall \(skill.name)?"
+      : "Remove \(skill.name) from \(Paths.abbreviate(copies[0].root.url))?"
+  }
+
+  func message(tools: [Tool]) -> String {
+    let folders = copies.map { Paths.abbreviate($0.root.url) }
+    var sentences = ["Skillscout moves it to the Trash from \(folders.formatted(.list(type: .and)))."]
+
+    let losing = tools.filter(skill.toolsLosing(copies).contains)
+    if losing.isEmpty {
+      sentences.append("Your agents still load it from another folder.")
+    } else if losing == tools.filter(skill.availableIn.contains) {
+      sentences.append("None of your agents will load it anymore.")
+    } else {
+      sentences.append("\(losing.map(\.name).formatted(.list(type: .and))) will stop loading it.")
+    }
+
+    let targets = skill.linkTargetsKept(copies)
+    if !targets.isEmpty {
+      let links = copies.count(where: { $0.isSymlink && targets.contains($0.resolved) })
+      sentences.append(
+        "\(links == 1 ? "The link points" : "The links point") to \(targets.map(Paths.abbreviate).formatted(.list(type: .and))), "
+          + "\(targets.count == 1 ? "which stays where it is" : "which stay where they are")."
+      )
+    }
+    return sentences.joined(separator: " ")
   }
 }

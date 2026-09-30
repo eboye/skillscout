@@ -8,7 +8,7 @@ The app and the command share these core files, which only import Foundation, Cr
 - `Skillscout/SkillScanner.swift`: finds every `SKILL.md` in the agents' folders and plugin caches, reads the frontmatter, and groups the copies of a skill.
 - `Skillscout/PromptLibrary.swift`: finds and parses the chats of Cursor, Claude Code and Codex, detects when an agent loads a skill, and caches parsed files in `chats-cache.json`.
 - `Skillscout/PromptLibrary+Tools.swift`: the parsers for Gemini CLI, Droid, Pi, Amp and OpenCode's SQLite database.
-- `Skillscout/SkillInstaller.swift`: adds a skill to another agent with a symlink (or a copy for plugin skills), and saves drafted skills.
+- `Skillscout/SkillInstaller.swift`: adds a skill to another agent with a symlink (or a copy for plugin skills), saves drafted skills, and moves skills to the Trash.
 - `Skillscout/Analyzer.swift`: the prompts for skill ideas, drafts and explanations, and the parsing of the replies.
 - `Skillscout/AIEngine.swift`: runs the Codex or Claude Code CLI with the user's login shell `PATH`.
 
@@ -43,7 +43,7 @@ swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark
 
 ## Rules
 
-- Skillscout only reads chats. It writes to the agents' folders in `SkillInstaller` alone, when the user adds or saves a skill.
+- Skillscout only reads chats. It writes to the agents' folders in `SkillInstaller` alone, when the user adds, saves or uninstalls a skill. Uninstalling moves folders and links to the Trash, never deletes them, and leaves plugin and built-in skills alone.
 - Apart from the daily update check on GitHub, the app makes no network requests of its own. The AI features run the user's Codex CLI (`--ephemeral`, read-only sandbox) or Claude Code CLI (`--no-session-persistence`, no tools). The README's Privacy section describes this, so keep it accurate if it changes.
 - When a chat parser changes, bump `cacheVersion` in `PromptLibrary.swift`, so cached results get parsed again.
 - When an agent's folders or read rules change in `Tool`, update the agents table in the README.

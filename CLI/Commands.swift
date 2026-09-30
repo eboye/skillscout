@@ -270,6 +270,46 @@ enum Commands {
     }
   }
 
+  static func uninstall(_ args: Arguments) async throws {
+    let name = try args.single("skill")
+    let library = await Library.load(days: args.days, readChats: false)
+    let skill = try library.skill(named: name)
+
+    var removed = skill.removableCopies
+    if let tool = try args.tool("from") {
+      guard let copy = removed.first(where: { $0.root.url == tool.skillsFolder }) else {
+        let source = skill.provider(for: tool).map { provider in
+          " \(tool.name) loads it from \(provider.root.kind == .plugin ? "the \(provider.sourceLabel)" : Paths.abbreviate(provider.root.url))."
+        }
+        throw CLIError(message: "\(skill.name) isn't in \(Paths.abbreviate(tool.skillsFolder)).\(source ?? "")")
+      }
+      removed = skill.copiesGoing(with: copy)
+    }
+    guard !removed.isEmpty else {
+      throw CLIError(message: skill.isBuiltInOnly
+        ? "\(skill.name) is built into \(skill.primary.root.owner?.name ?? "its tool"), so it stays."
+        : "\(skill.name) comes from the \(skill.primary.sourceLabel), so uninstall the plugin to remove it.")
+    }
+
+    try SkillInstaller.remove(removed)
+    for copy in removed {
+      print("Moved \(copy.isSymlink ? "the link " : "")\(Paths.abbreviate(copy.folder)) to the Trash")
+    }
+    let targets = skill.linkTargetsKept(removed).map(Paths.abbreviate)
+    if !targets.isEmpty {
+      print(dim("\(Terminal.list(targets)) \(targets.count == 1 ? "stays where it is" : "stay where they are")."))
+    }
+
+    let losing = library.tools.filter(skill.toolsLosing(removed).contains)
+    if losing.isEmpty {
+      print("Your tools still load \(skill.name) from another folder.")
+    } else if losing == library.tools.filter(skill.availableIn.contains) {
+      print("None of your tools load \(skill.name) anymore.")
+    } else {
+      print("\(Terminal.list(losing.map { Terminal.tint($0.name, $0) })) no longer \(losing.count == 1 ? "loads" : "load") it.")
+    }
+  }
+
   static func suggest(_ args: Arguments) async throws {
     let engine = try args.engine()
     let library = await Library.load(days: args.days, readChats: true)

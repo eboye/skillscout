@@ -120,6 +120,20 @@ struct ContentView: View {
     } message: {
       Text(store.errorMessage ?? "")
     }
+    .confirmationDialog(
+      store.removal?.title ?? "",
+      isPresented: Binding(
+        get: { store.removal != nil },
+        set: { if !$0 { store.removal = nil } }
+      ),
+      presenting: store.removal
+    ) { removal in
+      Button("Move to Trash", role: .destructive) {
+        Task { await store.remove(removal.copies) }
+      }
+    } message: { removal in
+      Text(removal.message(tools: store.tools))
+    }
   }
 
   private var sidebarList: some View {

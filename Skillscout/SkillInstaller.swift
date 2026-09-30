@@ -9,12 +9,25 @@ enum SkillInstaller {
   enum Failure: LocalizedError {
     case alreadyExists(URL)
     case builtIn(String)
+    case managed(URL)
 
     var errorDescription: String? {
       switch self {
       case .alreadyExists(let url): "\(Paths.abbreviate(url)) already exists."
       case .builtIn(let name): "\(name) is built into its tool and can't be moved."
+      case .managed(let url): "\(Paths.abbreviate(url)) belongs to a plugin or to its tool, so Skillscout leaves it alone."
       }
+    }
+  }
+
+  /// Moves the copies to the Trash, so you can put them back from there. A link goes on its own,
+  /// and the folder it points to stays.
+  static func remove(_ copies: [SkillCopy]) throws {
+    if let managed = copies.first(where: { $0.root.kind != .user && $0.root.kind != .shared }) {
+      throw Failure.managed(managed.folder)
+    }
+    for copy in copies {
+      try FileManager.default.trashItem(at: copy.folder, resultingItemURL: nil)
     }
   }
 

@@ -160,7 +160,28 @@ struct Skill: Identifiable, Sendable, Hashable {
   /// proves it existed earlier.
   func created(usage: SkillUsage?) -> Date { min(folderCreated, usage?.firstUsed ?? .distantFuture) }
 
-  var isPersonal: Bool { copies.contains { $0.root.kind == .user || $0.root.kind == .shared } }
+  /// The copies in your own skills folders. Plugins and tools manage the others.
+  var removableCopies: [SkillCopy] { copies.filter { $0.root.kind == .user || $0.root.kind == .shared } }
+
+  var isPersonal: Bool { !removableCopies.isEmpty }
+
+  /// Removing a folder takes the links to it along, since they'd point to nothing.
+  func copiesGoing(with copy: SkillCopy) -> [SkillCopy] {
+    guard !copy.isSymlink else { return [copy] }
+    return [copy] + removableCopies.filter { $0 != copy && $0.isSymlink && $0.resolved == copy.resolved }
+  }
+
+  /// The tools that stop loading the skill once `removed` are gone.
+  func toolsLosing(_ removed: [SkillCopy]) -> Set<Tool> {
+    availableIn.subtracting(copies.filter { !removed.contains($0) }.flatMap(\.root.readBy))
+  }
+
+  /// The folders that `removed` links to and that stay, because they're not among the copies removed.
+  func linkTargetsKept(_ removed: [SkillCopy]) -> [URL] {
+    let removedFolders = Set(removed.filter { !$0.isSymlink }.map(\.resolved))
+    var seen = Set<URL>()
+    return removed.filter(\.isSymlink).map(\.resolved).filter { !removedFolders.contains($0) && seen.insert($0).inserted }
+  }
 
   var isBuiltInOnly: Bool { copies.allSatisfy { $0.root.kind == .builtIn } }
 
