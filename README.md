@@ -6,6 +6,10 @@ It knows 8 agents: Cursor, Claude Code, Codex, Gemini CLI, OpenCode, Droid, Pi a
 
 It also reads your chats. It counts a use every time an agent loads a skill, and it looks for requests you keep typing, so you can turn them into new skills.
 
+Read the announcement and watch the 1-minute demo on my blog: [I built Skillscout, a Mac app for the skills your coding agents load](https://flaviocopes.com/skillscout/).
+
+[![Watch the 1-minute Skillscout demo](docs/showreel-poster.jpg)](https://flaviocopes.com/skillscout/)
+
 ## Download
 
 Get `Skillscout-1.0.0.zip` from the [latest release](https://github.com/flaviocopes/skillscout/releases/latest), unzip it, and drag Skillscout to your Applications folder. It runs on macOS 15 Sequoia or later, on Apple silicon and Intel Macs.
