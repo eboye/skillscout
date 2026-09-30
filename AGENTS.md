@@ -39,7 +39,7 @@ scripts/screenshot.sh              # docs/screenshot-*.png, from a demo home fol
 swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark screenshot
 ```
 
-`project.yml` is the source of the Xcode project, so edit it and regenerate instead of changing `project.pbxproj` by hand. The version lives in its `MARKETING_VERSION`. A new file the command needs goes in the `SkillscoutCLI` sources list there, and it can't import SwiftUI or AppKit.
+`project.yml` is the source of the Xcode project, so edit it and regenerate instead of changing `project.pbxproj` by hand. The version lives in its `MARKETING_VERSION`, and every release also bumps the build number in `CURRENT_PROJECT_VERSION`. A new file the command needs goes in the `SkillscoutCLI` sources list there, and it can't import SwiftUI or AppKit.
 
 ## Rules
 
@@ -47,8 +47,9 @@ swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark
 - Apart from the daily update check on GitHub, the app makes no network requests of its own. The AI features run the user's Codex CLI (`--ephemeral`, read-only sandbox) or Claude Code CLI (`--no-session-persistence`, no tools). The README's Privacy section describes this, so keep it accurate if it changes.
 - When a chat parser changes, bump `cacheVersion` in `PromptLibrary.swift`, so cached results get parsed again.
 - When an agent's folders or read rules change in `Tool`, update the agents table in the README.
-- Never use real skills or chats in screenshots, the banner or demos. `scripts/screenshot.sh` builds made-up ones in `build/demo-home`, under its own bundle ID.
+- Never use real skills or chats in screenshots, the banner or demos. `scripts/screenshot.sh` builds made-up ones in `build/demo-home`, under its own bundle ID. Test adding and uninstalling against a made-up home too, since `Paths.home` follows `$HOME`. The uninstalled test copies still go to the real Trash, so clean them up.
 - Verify UI changes by building the app and opening it.
 - The app isn't sandboxed, because it reads folders across the home folder, and has no Developer ID. Releases are ad-hoc signed and not notarized.
-- The updater trusts the GitHub release. Every release needs its `vX.Y.Z` tag, the zip from `scripts/build-release.sh` attached, and a `MARKETING_VERSION` that matches the tag, or the app refuses the update.
+- The updater trusts the GitHub release. Every release needs its `vX.Y.Z` tag, the zip from `scripts/build-release.sh` attached, and a `MARKETING_VERSION` that matches the tag, or the app refuses the update. The update dialog shows the release notes above `## Install`, so the new features go first.
 - The 1-minute demo video comes from the separate Remotion project `~/dev/skillscout-showreel`. It's not part of this repo.
+- The launch post is `src/posts/skillscout.md` in `~/www/flaviocopes.com`, live at flaviocopes.com/skillscout. A release with new features also updates that post and the site's changelog, following that repo's `AGENTS.md`.
