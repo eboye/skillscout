@@ -1,0 +1,33 @@
+{
+  "fill-specializations" : [
+    { "value" : { "linear-gradient" : ["extended-srgb:0.09804,0.10980,0.20000,1.00000", "extended-srgb:0.18824,0.20784,0.41961,1.00000"] } },
+    { "appearance" : "dark", "value" : { "linear-gradient" : ["extended-srgb:0.04314,0.04706,0.09412,1.00000", "extended-srgb:0.10980,0.12157,0.25882,1.00000"] } }
+  ],
+  "groups" : [
+    {
+      "name" : "Lens",
+      "layers" : [
+        { "name" : "Sparkle", "image-name" : "sparkle.png", "glass" : true },
+        { "name" : "Lens", "image-name" : "lens.png", "glass" : true }
+      ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.5 },
+      "specular" : true,
+      "translucency" : { "enabled" : true, "value" : 0.2 }
+    },
+    {
+      "name" : "Cards",
+      "layers" : [
+        { "name" : "Lines", "image-name" : "lines.png", "glass" : true, "opacity" : 0.8 },
+        { "name" : "Cursor", "image-name" : "cursor.png", "glass" : true },
+        { "name" : "Claude", "image-name" : "claude.png", "glass" : true },
+        { "name" : "Codex", "image-name" : "codex.png", "glass" : true }
+      ],
+      "shadow" : { "kind" : "neutral", "opacity" : 0.5 },
+      "specular" : true,
+      "translucency" : { "enabled" : true, "value" : 0.3 }
+    }
+  ],
+  "supported-platforms" : {
+    "squares" : ["macOS"]
+  }
+}

@@ -1,0 +1,208 @@
+import SwiftUI
+
+enum SidebarItem: Hashable {
+  case allSkills
+  case missing
+  case unused
+  case tool(Tool)
+  case suggestions
+}
+
+struct ContentView: View {
+  @Environment(AppStore.self) private var store
+  @State private var sidebar: SidebarItem? = .allSkills
+  @State private var selectedSkill: Skill.ID?
+  @State private var selectedSuggestion: Suggestion.ID?
+  @State private var search = ""
+  @FocusState private var isSearchFocused: Bool
+  @AppStorage("showPluginSkills") private var showPluginSkills = false
+  @AppStorage("skillSort") private var sort = SkillSort.newest
+
+  init(sidebar: SidebarItem = .allSkills, skill: Skill.ID? = nil, suggestion: Suggestion.ID? = nil) {
+    _sidebar = State(initialValue: sidebar)
+    _selectedSkill = State(initialValue: skill)
+    _selectedSuggestion = State(initialValue: suggestion)
+  }
+
+  private var librarySkills: [Skill] {
+    let tools = Set(store.tools)
+    return store.skills.filter { (showPluginSkills || $0.isPersonal) && !$0.availableIn.isDisjoint(with: tools) }
+  }
+
+  private func isMissing(_ skill: Skill) -> Bool {
+    skill.isPersonal && !skill.missing(from: store.tools).isEmpty
+  }
+
+  private var listedSkills: [Skill] {
+    var skills: [Skill]
+    switch sidebar {
+    case .missing: skills = librarySkills.filter(isMissing)
+    case .unused: skills = librarySkills.filter { store.usage[$0.id] == nil }
+    case .tool(let tool): skills = librarySkills.filter { $0.availableIn.contains(tool) }
+    default: skills = librarySkills
+    }
+    if !search.isEmpty {
+      skills = skills.filter {
+        $0.name.localizedCaseInsensitiveContains(search) || $0.description.localizedCaseInsensitiveContains(search)
+      }
+    }
+    return skills.sorted { sort.inOrder($0, $1) { store.usage[$0.id] } }
+  }
+
+  private var listedSuggestions: [Suggestion] {
+    guard !search.isEmpty else { return store.suggestions }
+    return store.suggestions.filter {
+      $0.title.localizedCaseInsensitiveContains(search) || $0.summary.localizedCaseInsensitiveContains(search)
+    }
+  }
+
+  var body: some View {
+    NavigationSplitView {
+      sidebarList
+    } content: {
+      if sidebar == .suggestions {
+        SuggestionList(suggestions: listedSuggestions, selection: $selectedSuggestion)
+      } else {
+        SkillList(skills: listedSkills, selection: $selectedSkill)
+      }
+    } detail: {
+      if sidebar == .suggestions {
+        if let suggestion = store.suggestion(selectedSuggestion) {
+          SuggestionDetail(suggestion: suggestion)
+        } else {
+          ContentUnavailableView("Pick a suggestion", systemImage: "lightbulb")
+        }
+      } else if let skill = store.skill(selectedSkill) {
+        SkillDetail(skill: skill)
+      } else {
+        ContentUnavailableView("Pick a skill", systemImage: "square.stack.3d.up")
+      }
+    }
+    .searchable(text: $search)
+    .searchFocused($isSearchFocused)
+    .onChange(of: store.searchRequests) { isSearchFocused = true }
+    .onChange(of: store.tools) {
+      if case .tool(let tool) = sidebar, !store.tools.contains(tool) { sidebar = .allSkills }
+    }
+    .toolbar {
+      ToolbarItem {
+        Picker("Sort", selection: $sort) {
+          Text("Newest first").tag(SkillSort.newest)
+          Text("Sort by name").tag(SkillSort.name)
+          Text("Sort by use").tag(SkillSort.use)
+        }
+        .pickerStyle(.menu)
+        .disabled(sidebar == .suggestions)
+        .help("Sort skills by when you created them, by name, or by how often they're used")
+      }
+      ToolbarItem {
+        Toggle(isOn: $showPluginSkills) {
+          Label("Plugin and built-in skills", systemImage: "puzzlepiece.extension")
+        }
+        .help("Show plugin and built-in skills too")
+      }
+      ToolbarItem {
+        Button {
+          sidebar = .suggestions
+          Task { await store.analyze() }
+        } label: {
+          Label("Find repeated tasks", systemImage: "sparkle.magnifyingglass")
+        }
+        .disabled(store.isAnalyzing || store.prompts.isEmpty)
+        .help("Analyze your recent chats and suggest new skills")
+      }
+    }
+    .alert("Something went wrong", isPresented: Binding(
+      get: { store.errorMessage != nil },
+      set: { if !$0 { store.errorMessage = nil } }
+    )) {
+      Button("OK") {}
+    } message: {
+      Text(store.errorMessage ?? "")
+    }
+  }
+
+  private var sidebarList: some View {
+    List(selection: $sidebar) {
+      Section("Skills") {
+        sidebarRow("All skills", symbol: "square.stack.3d.up", count: librarySkills.count, item: .allSkills)
+        sidebarRow("Missing somewhere", symbol: "exclamationmark.triangle", count: librarySkills.count(where: isMissing), item: .missing)
+        sidebarRow("Unused", symbol: "moon.zzz", count: librarySkills.count(where: { store.usage[$0.id] == nil }), item: .unused)
+      }
+      Section("Available in") {
+        ForEach(store.tools) { tool in
+          sidebarRow(tool.name, symbol: tool.symbol, color: tool.color, count: librarySkills.count(where: { $0.availableIn.contains(tool) }), item: .tool(tool))
+        }
+      }
+      Section("Ideas") {
+        sidebarRow("Suggestions", symbol: "lightbulb", count: store.suggestions.count, item: .suggestions)
+      }
+    }
+    .navigationSplitViewColumnWidth(min: 210, ideal: 230)
+    .safeAreaInset(edge: .bottom) {
+      StatusPanel()
+    }
+  }
+
+  private func sidebarRow(_ title: String, symbol: String, color: Color? = nil, count: Int, item: SidebarItem) -> some View {
+    Label {
+      Text(title)
+    } icon: {
+      Image(systemName: symbol).foregroundStyle(color.map(AnyShapeStyle.init) ?? AnyShapeStyle(.tint))
+    }
+    .badge(count)
+    .tag(item)
+  }
+}
+
+struct StatusPanel: View {
+  @Environment(AppStore.self) private var store
+  @AppStorage("lookbackDays") private var lookbackDays = 60
+
+  private var status: String {
+    if store.isAnalyzing { return "Looking for repeated tasks…" }
+    if store.isLoadingPrompts { return "Reading your chats…" }
+    return "Watching your chats"
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack(spacing: 6) {
+        if store.isAnalyzing || store.isLoadingPrompts {
+          ProgressView().controlSize(.mini)
+        } else {
+          Image(systemName: "circle.fill").font(.system(size: 7)).foregroundStyle(.green)
+        }
+        Text(status).font(.caption.weight(.medium))
+      }
+      Text("\(store.prompts.count) messages in the last \(lookbackDays) days")
+        .font(.caption)
+        .foregroundStyle(.secondary)
+      LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6, alignment: .leading), count: 4), alignment: .leading, spacing: 4) {
+        ForEach(store.tools) { tool in
+          let count = store.prompts.count(where: { $0.tool == tool })
+          if count > 0 {
+            HStack(spacing: 3) {
+              Image(systemName: tool.symbol).foregroundStyle(tool.color)
+              Text("\(count)").lineLimit(1).minimumScaleFactor(0.8)
+            }
+            .help("\(count) messages from \(tool.name)")
+          }
+        }
+      }
+      .font(.caption2)
+      .foregroundStyle(.secondary)
+      Group {
+        if let last = store.lastAnalysis {
+          Text("Analyzed \(last, format: .relative(presentation: .named)), \(store.newPromptCount) new since")
+        } else {
+          Text("Not analyzed yet")
+        }
+      }
+      .font(.caption2)
+      .foregroundStyle(.tertiary)
+    }
+    .padding(12)
+    .frame(maxWidth: .infinity, alignment: .leading)
+  }
+}
