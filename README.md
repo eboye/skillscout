@@ -46,6 +46,8 @@ defaults write com.flaviocopes.skillscout AppUpdaterAutomaticChecks -bool false
 - **Missing somewhere** lists the skills at least one of your agents can't see
 - **Add to** links the skill folder into another agent's skills folder, so every agent loads the same file
 - **Uninstall** moves a skill to the Trash, from all your skills folders or from one of them
+- **Rename** gives a skill a new name in its folders, its links and its `SKILL.md`, and keeps its usage
+- **Similar skills** pairs the skills that read alike, and **Merge with AI** turns two of them into one
 - **Unused** lists the skills no chat touched in the last 60 days
 - Usage for each skill: how many chats, from which agents, in which projects, and when you last used it
 - The skills you created last come first, and you can sort by name or by use instead
@@ -97,13 +99,38 @@ Plugin skills get copied instead of linked, because a plugin update replaces its
 
 ## Removing a skill
 
-Pick a skill and click **Uninstall this skill** under **Where it lives**. You can also right-click it in the list, or select it and press Delete. Skillscout moves every copy in your skills folders to the Trash, links included, so you can put it back from there.
+Select a skill and click the Trash button in the toolbar, or **Uninstall this skill** under **Where it lives**. You can also right-click it in the list, or press Delete. Skillscout moves every copy in your skills folders to the Trash, links included, so you can put it back from there.
 
 To take a skill away from some agents only, click **Remove** next to one of its folders. If other folders link to that one, the links go too, since they'd point to nothing. When you remove a link, the folder it points to stays.
 
 Before anything moves, Skillscout tells you which agents will stop loading the skill.
 
 Plugin and built-in skills stay where they are. Their agents manage them, so uninstall the plugin to remove its skills.
+
+## Renaming a skill
+
+Select a skill and click the pencil in the toolbar, or **Rename…** under **Where it lives**. Names use lowercase letters, numbers and hyphens, like `release-notes`.
+
+Skillscout renames the skill's folders in your skills folders, creates its links again under the new name, and changes the `name` in its `SKILL.md`. A folder outside your skills folders, like a repo of skills your links point to, keeps its folder name. A plugin copy keeps the old name too.
+
+Chats that used the old name keep counting for the skill.
+
+## Merging similar skills
+
+After a while, you end up with two skills that do almost the same job. **Similar skills** in the sidebar lists the pairs that read alike, and the words they share.
+
+Skillscout compares the words in each skill's name, description and `SKILL.md`, and rare words count more than common ones. It runs on your Mac, without AI, and it only pairs your own skills, not plugin or built-in ones.
+
+Pick a pair to see the two skills side by side. Choose the name to keep and click **Merge with AI**. Claude Code or Codex writes one `SKILL.md` from both, and you can edit it before anything changes. When you click **Merge into**, Skillscout:
+
+- writes the new `SKILL.md` into the kept skill's folder, and moves the old one to the Trash
+- copies over the other skill's extra files, like templates and references, unless the kept skill has one at the same path
+- moves the other skill to the Trash
+- links the kept skill into the other one's folders, so the agents that loaded the other skill load the kept one
+
+Chats that used the other skill count for the kept one from then on.
+
+If two skills look alike but do different jobs, click **They're different skills**, and Skillscout won't pair them again.
 
 ## Counting uses
 
@@ -140,7 +167,10 @@ The command reads the same skills and chats as the app, and follows its settings
 | `skillscout show <skill>` | Where a skill lives, which agents see it, and its usage |
 | `skillscout usage` | Ranks skills by how many chats used them |
 | `skillscout tools` | The agents Skillscout knows, and where each one keeps its skills |
+| `skillscout similar` | Lists the pairs of skills that read alike |
 | `skillscout add <skill> --to <tool>` | Adds a skill to another agent |
+| `skillscout rename <skill> <new-name>` | Gives a skill a new name |
+| `skillscout merge <skill> <other>` | Merges the other skill into the first one with AI |
 | `skillscout uninstall <skill>` | Moves a skill to the Trash |
 | `skillscout suggest` | Asks AI for skill ideas based on requests you repeat |
 | `skillscout explain <skill>` | Asks AI what a skill does |
@@ -213,7 +243,30 @@ skillscout add release-notes --all
 skillscout uninstall release-notes --from amp
 ```
 
-`suggest` and `explain` take `--engine codex` or `--engine claude`, and `--model` to pick the model. `explain` returns the app's saved explanation when there is one, and `--fresh` asks again.
+`rename` takes the skill and its new name:
+
+```sh
+skillscout rename release-notes changelog
+```
+
+`similar` lists the same pairs as the app, without the ones you dismissed there:
+
+```sh
+skillscout similar
+```
+
+```
+SKILLS                       ALIKE  BOTH MENTION
+email-style + writing-style    34%  tone, short, sentences, friendly
+```
+
+`merge` keeps the first skill and merges the other one into it. Add `--dry-run` to read the merged `SKILL.md` before anything changes:
+
+```sh
+skillscout merge writing-style email-style --dry-run
+```
+
+`suggest`, `explain` and `merge` take `--engine codex` or `--engine claude`, and `--model` to pick the model. `explain` returns the app's saved explanation when there is one, and `--fresh` asks again.
 
 Most commands take `--json`, so you can use Skillscout from scripts:
 
@@ -225,11 +278,11 @@ skillscout list --unused --json
 
 Skillscout reads your skill folders and your chats on your Mac, and has no accounts or analytics. The only request it makes on its own goes to GitHub: once a day, it asks whether there's a newer version of Skillscout, and it downloads one only when you click **Install and Relaunch**.
 
-Your chats leave your Mac only through the AI features. **Explain with AI**, **Find repeated tasks** and **Draft the skill with AI** run the Codex CLI or the Claude Code CLI you're already logged in to, so the prompt goes to OpenAI or Anthropic under your own account. To find skill ideas, that prompt includes up to 2,000 of your recent messages, each cut to 220 characters, with the agent and project it came from.
+Your chats leave your Mac only through the AI features. **Explain with AI**, **Find repeated tasks**, **Draft the skill with AI** and **Merge with AI** run the Codex CLI or the Claude Code CLI you're already logged in to, so the prompt goes to OpenAI or Anthropic under your own account. To find skill ideas, that prompt includes up to 2,000 of your recent messages, each cut to 220 characters, with the agent and project it came from. To merge two skills, it includes both `SKILL.md` files and the names of their other files.
 
 Skillscout runs Codex with `--ephemeral` in a read-only sandbox, and Claude Code with `--no-session-persistence` and no tools. These runs don't show up in your chat history.
 
-Skillscout keeps its own data in `~/Library/Application Support/Skillscout`. There's a cache of the chats it parsed, and the explanations, ideas and drafts it saved.
+Skillscout keeps its own data in `~/Library/Application Support/Skillscout`. There's a cache of the chats it parsed, and the explanations, ideas and drafts it saved. It also remembers the old names of the skills you renamed or merged, so their chats keep counting.
 
 ## Build it from source
 
@@ -257,7 +310,7 @@ The Xcode project is generated from `project.yml` with [XcodeGen](https://github
 xcodegen generate
 ```
 
-The command line tool shares the app's core files: the models, the skill scanner, the chat readers, the installer and the AI engine. Its own code lives in `CLI/`.
+The command line tool shares the app's core files: the models, the skill scanner, the chat readers, the installer, the similarity check and the AI engine. Its own code lives in `CLI/`.
 
 The app icon is drawn in code. Edit `scripts/render-icon.swift`, then write a new `Skillscout/AppIcon.icon`:
 

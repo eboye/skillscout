@@ -6,6 +6,9 @@ enum SidebarItem: Hashable {
   case unused
   case tool(Tool)
   case suggestions
+  case similar
+
+  var listsSkills: Bool { self != .suggestions && self != .similar }
 }
 
 struct ContentView: View {
@@ -13,15 +16,17 @@ struct ContentView: View {
   @State private var sidebar: SidebarItem? = .allSkills
   @State private var selectedSkill: Skill.ID?
   @State private var selectedSuggestion: Suggestion.ID?
+  @State private var selectedPair: SimilarPair.ID?
   @State private var search = ""
   @FocusState private var isSearchFocused: Bool
   @AppStorage("showPluginSkills") private var showPluginSkills = false
   @AppStorage("skillSort") private var sort = SkillSort.newest
 
-  init(sidebar: SidebarItem = .allSkills, skill: Skill.ID? = nil, suggestion: Suggestion.ID? = nil) {
+  init(sidebar: SidebarItem = .allSkills, skill: Skill.ID? = nil, suggestion: Suggestion.ID? = nil, pair: SimilarPair.ID? = nil) {
     _sidebar = State(initialValue: sidebar)
     _selectedSkill = State(initialValue: skill)
     _selectedSuggestion = State(initialValue: suggestion)
+    _selectedPair = State(initialValue: pair)
   }
 
   private var librarySkills: [Skill] {
@@ -49,6 +54,26 @@ struct ContentView: View {
     return skills.sorted { sort.inOrder($0, $1) { store.usage[$0.id] } }
   }
 
+  private var listedPairs: [SimilarPair] {
+    let listed = Set(librarySkills.map(\.id))
+    return store.similar.filter { pair in
+      listed.contains(pair.first) && listed.contains(pair.second)
+        && (search.isEmpty || pair.first.localizedCaseInsensitiveContains(search) || pair.second.localizedCaseInsensitiveContains(search))
+    }
+  }
+
+  /// The selected skill, when it's yours to rename or uninstall.
+  private var actionSkill: Skill? {
+    guard sidebar?.listsSkills ?? true, let skill = store.skill(selectedSkill), skill.isPersonal else { return nil }
+    return skill
+  }
+
+  /// Merging keeps the skill you use more, or the one more tools load.
+  private func suggestedKeep(_ pair: SimilarPair) -> Skill.ID {
+    func weight(_ id: Skill.ID) -> (Int, Int) { (store.usage[id]?.chats ?? 0, store.skill(id)?.availableIn.count ?? 0) }
+    return weight(pair.second) > weight(pair.first) ? pair.second : pair.first
+  }
+
   private var listedSuggestions: [Suggestion] {
     guard !search.isEmpty else { return store.suggestions }
     return store.suggestions.filter {
@@ -62,6 +87,8 @@ struct ContentView: View {
     } content: {
       if sidebar == .suggestions {
         SuggestionList(suggestions: listedSuggestions, selection: $selectedSuggestion)
+      } else if sidebar == .similar {
+        SimilarList(pairs: listedPairs, selection: $selectedPair)
       } else {
         SkillList(skills: listedSkills, selection: $selectedSkill)
       }
@@ -71,6 +98,12 @@ struct ContentView: View {
           SuggestionDetail(suggestion: suggestion)
         } else {
           ContentUnavailableView("Pick a suggestion", systemImage: "lightbulb")
+        }
+      } else if sidebar == .similar {
+        if let pair = listedPairs.first(where: { $0.id == selectedPair }) {
+          SimilarDetail(pair: pair, keep: suggestedKeep(pair)).id(pair.id)
+        } else {
+          ContentUnavailableView("Pick two similar skills", systemImage: "arrow.triangle.merge")
         }
       } else if let skill = store.skill(selectedSkill) {
         SkillDetail(skill: skill)
@@ -84,7 +117,29 @@ struct ContentView: View {
     .onChange(of: store.tools) {
       if case .tool(let tool) = sidebar, !store.tools.contains(tool) { sidebar = .allSkills }
     }
+    .onChange(of: store.revealRequest) {
+      guard let id = store.revealRequest else { return }
+      if !(sidebar?.listsSkills ?? false) { sidebar = .allSkills }
+      selectedSkill = id
+      store.revealRequest = nil
+    }
     .toolbar {
+      ToolbarItemGroup {
+        Button {
+          store.renaming = actionSkill
+        } label: {
+          Label("Rename", systemImage: "pencil")
+        }
+        .disabled(actionSkill == nil)
+        .help("Rename the selected skill")
+        Button {
+          if let skill = actionSkill { store.removal = .uninstall(skill) }
+        } label: {
+          Label("Uninstall", systemImage: "trash")
+        }
+        .disabled(actionSkill == nil)
+        .help("Uninstall the selected skill from every tool, by moving it to the Trash")
+      }
       ToolbarItem {
         Picker("Sort", selection: $sort) {
           Text("Newest first").tag(SkillSort.newest)
@@ -92,7 +147,7 @@ struct ContentView: View {
           Text("Sort by use").tag(SkillSort.use)
         }
         .pickerStyle(.menu)
-        .disabled(sidebar == .suggestions)
+        .disabled(!(sidebar?.listsSkills ?? true))
         .help("Sort skills by when you created them, by name, or by how often they're used")
       }
       ToolbarItem {
@@ -134,6 +189,9 @@ struct ContentView: View {
     } message: { removal in
       Text(removal.message(tools: store.tools))
     }
+    .sheet(item: Binding(get: { store.renaming }, set: { store.renaming = $0 })) { skill in
+      RenameSheet(skill: skill)
+    }
   }
 
   private var sidebarList: some View {
@@ -150,6 +208,7 @@ struct ContentView: View {
       }
       Section("Ideas") {
         sidebarRow("Suggestions", symbol: "lightbulb", count: store.suggestions.count, item: .suggestions)
+        sidebarRow("Similar skills", symbol: "arrow.triangle.merge", count: listedPairs.count, item: .similar)
       }
     }
     .navigationSplitViewColumnWidth(min: 210, ideal: 230)

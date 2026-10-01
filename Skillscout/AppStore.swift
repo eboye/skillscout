@@ -12,6 +12,12 @@ final class AppStore {
   var suggestions: [Suggestion] = []
   var explanations: [String: String] = [:]
   var dismissed: [String] = []
+  /// Pairs of your skills that read alike, most alike first.
+  var similar: [SimilarPair] = []
+  /// The pairs you said aren't alike, by `SimilarPair.id`.
+  var dismissedPairs: [String] = []
+  /// Merged SKILL.md drafts, by `MergePlan.id`.
+  var mergeDrafts: [String: String] = [:]
   var analyzedIDs: Set<String> = []
   var lastAnalysis: Date?
 
@@ -22,6 +28,10 @@ final class AppStore {
   var searchRequests = 0
   /// Copies waiting for you to confirm, before they go to the Trash.
   var removal: Removal?
+  /// The skill whose new name you're typing.
+  var renaming: Skill?
+  /// A skill to select once it has a new name, or once a merge made it.
+  var revealRequest: Skill.ID?
 
   @ObservationIgnored private let library = PromptLibrary()
   @ObservationIgnored private var allPrompts: [Prompt] = []
@@ -72,7 +82,11 @@ final class AppStore {
   }
 
   func refreshSkills() async {
-    skills = await Task.detached { SkillScanner.scan() }.value
+    let dismissed = Set(dismissedPairs)
+    (skills, similar) = await Task.detached {
+      let skills = SkillScanner.scan()
+      return (skills, SkillSimilarity.pairs(in: skills, dismissed: dismissed))
+    }.value
     applyTools()
   }
 
@@ -87,7 +101,7 @@ final class AppStore {
   private func applyTools() {
     let enabled = Set(tools)
     prompts = allPrompts.filter { enabled.contains($0.tool) }
-    usage = SkillUsage.tally(uses.filter { enabled.contains($0.tool) }, skills: skills)
+    usage = SkillUsage.tally(uses.filter { enabled.contains($0.tool) }, skills: skills, aliases: SkillAliases.load())
   }
 
   private static let chatFolders = [
@@ -188,6 +202,47 @@ final class AppStore {
     await refreshSkills()
   }
 
+  func rename(_ skill: Skill, to name: String) async {
+    do {
+      try SkillInstaller.rename(skill, to: name, among: skills)
+      await refreshSkills()
+      revealRequest = name
+    } catch {
+      errorMessage = error.localizedDescription
+      await refreshSkills()
+    }
+  }
+
+  func dismissPair(_ pair: SimilarPair) {
+    dismissedPairs.append(pair.id)
+    similar.removeAll { $0.id == pair.id }
+    saveState()
+  }
+
+  func draftMerge(_ plan: SkillInstaller.MergePlan) async {
+    let busyKey = "merge:\(plan.id)"
+    busy.insert(busyKey)
+    defer { busy.remove(busyKey) }
+    do {
+      mergeDrafts[plan.id] = try await Analyzer.mergeSkills(plan, engine: .current)
+    } catch {
+      errorMessage = error.localizedDescription
+    }
+  }
+
+  func merge(_ plan: SkillInstaller.MergePlan) async {
+    guard let draft = mergeDrafts[plan.id] else { return }
+    do {
+      try SkillInstaller.merge(plan, markdown: draft)
+      mergeDrafts[plan.id] = nil
+      await refreshSkills()
+      revealRequest = plan.kept.id
+    } catch {
+      errorMessage = error.localizedDescription
+      await refreshSkills()
+    }
+  }
+
   func draft(_ id: Suggestion.ID) async {
     guard let suggestion = suggestion(id) else { return }
     let busyKey = "draft:\(id)"
@@ -234,6 +289,7 @@ final class AppStore {
     var explanations: [String: String]
     var analyzedIDs: [String]
     var lastAnalysis: Date?
+    var dismissedPairs: [String]?
   }
 
   private func loadState() {
@@ -245,6 +301,7 @@ final class AppStore {
     explanations = state.explanations
     analyzedIDs = Set(state.analyzedIDs)
     lastAnalysis = state.lastAnalysis
+    dismissedPairs = state.dismissedPairs ?? []
   }
 
   private func saveState() {
@@ -255,7 +312,8 @@ final class AppStore {
       dismissed: dismissed,
       explanations: explanations,
       analyzedIDs: Array(analyzedIDs),
-      lastAnalysis: lastAnalysis
+      lastAnalysis: lastAnalysis,
+      dismissedPairs: dismissedPairs
     )
     guard let data = try? JSONEncoder().encode(state) else { return }
     try? data.write(to: stateFile, options: .atomic)

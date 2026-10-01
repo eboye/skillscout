@@ -35,6 +35,7 @@ targets:
       - CLI
       - Skillscout/Models.swift
       - Skillscout/SkillScanner.swift
+      - Skillscout/SkillSimilarity.swift
       - Skillscout/PromptLibrary.swift
       - Skillscout/PromptLibrary+Tools.swift
       - Skillscout/SkillInstaller.swift

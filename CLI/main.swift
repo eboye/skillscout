@@ -64,6 +64,13 @@ struct Arguments {
     return value
   }
 
+  func two(_ first: String, _ second: String, example: String) throws -> (String, String) {
+    guard positional.count == 2 else {
+      throw CLIError(message: "Pass the \(first) and the \(second), like: skillscout \(command ?? "") \(example)", usage: true)
+    }
+    return (positional[0], positional[1])
+  }
+
   func tool(_ option: String) throws -> Tool? {
     guard let value = options[option] else { return nil }
     guard let tool = Tool(argument: value) else {
@@ -97,7 +104,7 @@ struct Arguments {
 }
 
 enum Command: String, CaseIterable {
-  case list, show, usage, tools, add, uninstall, suggest, explain
+  case list, show, usage, tools, similar, add, rename, merge, uninstall, suggest, explain
 
   var synopsis: String {
     switch self {
@@ -105,7 +112,10 @@ enum Command: String, CaseIterable {
     case .show: "show <skill> [options]"
     case .usage: "usage [options]"
     case .tools: "tools [options]"
+    case .similar: "similar [options]"
     case .add: "add <skill> --to <tool> | --all"
+    case .rename: "rename <skill> <new-name>"
+    case .merge: "merge <skill> <other> [options]"
     case .uninstall: "uninstall <skill> [--from <tool>]"
     case .suggest: "suggest [options]"
     case .explain: "explain <skill> [options]"
@@ -118,7 +128,10 @@ enum Command: String, CaseIterable {
     case .show: "Where a skill lives, which tools see it, and its usage"
     case .usage: "Rank skills by how many chats used them"
     case .tools: "The agent tools Skillscout knows about"
+    case .similar: "Pairs of skills that read alike"
     case .add: "Add a skill to another tool"
+    case .rename: "Give a skill a new name"
+    case .merge: "Merge another skill into this one with AI"
     case .uninstall: "Move a skill to the Trash"
     case .suggest: "Ask AI for skill ideas based on requests you repeat"
     case .explain: "Ask AI what a skill does"
@@ -135,6 +148,12 @@ enum Command: String, CaseIterable {
       "Ranks skills by the number of chats that used them. A use is a chat where the agent read the skill's SKILL.md, or where you attached or invoked the skill yourself."
     case .tools:
       "Lists the agent tools Skillscout knows, whether they're on, and where each one keeps its skills. Turn tools on or off in the app's settings."
+    case .similar:
+      "Compares the words your skills use, on your Mac and without AI, and lists the pairs that read alike, so you can merge them. Pairs you dismissed in the app stay hidden."
+    case .rename:
+      "Renames a skill's folders and links in your skills folders, and the name in its SKILL.md. Folders that links point to outside your skills folders keep their name, and plugin copies keep the old name. Chats that used the old name still count."
+    case .merge:
+      "Asks AI to write one SKILL.md from two skills, and makes it the SKILL.md of the first one. The old SKILL.md and the other skill go to the Trash, and the first skill gets linked wherever the other one was, so no tool loses it. The other skill's files come along, unless the first one has a file at the same path."
     case .add:
       "Makes a skill available in another tool. Skillscout links the skill folder into that tool's skills folder, so an edit shows up everywhere. Plugin skills get copied instead, since plugin updates replace their folders."
     case .uninstall:
@@ -165,6 +184,12 @@ enum Command: String, CaseIterable {
       ]
     case .show, .usage, .tools:
       return [days, json]
+    case .similar:
+      return [json]
+    case .rename:
+      return []
+    case .merge:
+      return [("--dry-run", "Print the merged SKILL.md and change nothing")] + engine
     case .add:
       return [
         ("--to <tool>", "The tool to add it to"),
@@ -189,7 +214,10 @@ enum Command: String, CaseIterable {
     case .show: try await Commands.show(args)
     case .usage: try await Commands.usage(args)
     case .tools: try await Commands.tools(args)
+    case .similar: try await Commands.similar(args)
     case .add: try await Commands.add(args)
+    case .rename: try await Commands.rename(args)
+    case .merge: try await Commands.merge(args)
     case .uninstall: try await Commands.uninstall(args)
     case .suggest: try await Commands.suggest(args)
     case .explain: try await Commands.explain(args)

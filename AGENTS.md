@@ -4,12 +4,13 @@ A SwiftUI macOS app, plus a `skillscout` command-line tool, that lists the skill
 
 The app and the command share these core files, which only import Foundation, CryptoKit and SQLite3:
 
-- `Skillscout/Models.swift`: `Paths`, `Tool` (the 8 agents, their skills folders, and which folders each one reads), `Skill`, `SkillCopy`, `SkillSort`, `Prompt`, `SkillUse`, `SkillUsage` and `Suggestion`.
+- `Skillscout/Models.swift`: `Paths`, `Tool` (the 8 agents, their skills folders, and which folders each one reads), `Skill`, `SkillCopy`, `SkillSort`, `Prompt`, `SkillUse`, `SkillUsage`, `SkillAliases` and `Suggestion`.
 - `Skillscout/SkillScanner.swift`: finds every `SKILL.md` in the agents' folders and plugin caches, reads the frontmatter, and groups the copies of a skill.
+- `Skillscout/SkillSimilarity.swift`: pairs the personal skills that read alike, with TF-IDF over their names, descriptions and `SKILL.md` bodies. No AI.
 - `Skillscout/PromptLibrary.swift`: finds and parses the chats of Cursor, Claude Code and Codex, detects when an agent loads a skill, and caches parsed files in `chats-cache.json`.
 - `Skillscout/PromptLibrary+Tools.swift`: the parsers for Gemini CLI, Droid, Pi, Amp and OpenCode's SQLite database.
-- `Skillscout/SkillInstaller.swift`: adds a skill to another agent with a symlink (or a copy for plugin skills), saves drafted skills, and moves skills to the Trash.
-- `Skillscout/Analyzer.swift`: the prompts for skill ideas, drafts and explanations, and the parsing of the replies.
+- `Skillscout/SkillInstaller.swift`: adds a skill to another agent with a symlink (or a copy for plugin skills), saves drafted skills, renames and merges skills, and moves skills to the Trash.
+- `Skillscout/Analyzer.swift`: the prompts for skill ideas, drafts, explanations and merges, and the parsing of the replies.
 - `Skillscout/AIEngine.swift`: runs the Codex or Claude Code CLI with the user's login shell `PATH`.
 
 App only:
@@ -17,7 +18,7 @@ App only:
 - `Skillscout/AppStore.swift`: the observable state, loading, the file watcher hookup, the AI actions and `state.json`.
 - `Skillscout/FileWatcher.swift`: the FSEvents stream on the agents' folders.
 - `Skillscout/ContentView.swift`: the split view, the sidebar, the toolbar and the status panel.
-- `Skillscout/SkillViews.swift` and `Skillscout/SuggestionViews.swift`: the lists and detail panes.
+- `Skillscout/SkillViews.swift`, `Skillscout/SuggestionViews.swift` and `Skillscout/SimilarViews.swift`: the lists and detail panes, plus the rename sheet.
 - `Skillscout/Components.swift`: agent badges and icons, detail sections, Finder helpers.
 - `Skillscout/SettingsView.swift`, `Skillscout/SkillscoutApp.swift`, `Skillscout/CommandLineTool.swift` (the Install Command Line Tool menu item).
 - `Skillscout/AppUpdater.swift`: checks the GitHub releases once a day and installs updates. It's an identical copy of the template in the `mac-app-updater` skill, so change the template and copy it over instead of editing it here.
@@ -43,11 +44,12 @@ swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark
 
 ## Rules
 
-- Skillscout only reads chats. It writes to the agents' folders in `SkillInstaller` alone, when the user adds, saves or uninstalls a skill. Uninstalling moves folders and links to the Trash, never deletes them, and leaves plugin and built-in skills alone.
+- Skillscout only reads chats. It writes to the agents' folders in `SkillInstaller` alone, when the user adds, saves, renames, merges or uninstalls a skill. Uninstalling and merging move folders, links and replaced `SKILL.md` files to the Trash, never delete them, and leave plugin and built-in skills alone. Renaming deletes a link only to create it again under the new name.
+- Renames and merges record the old name in `aliases.json`, so `SkillUsage.tally` keeps counting the chats that used it.
 - Apart from the daily update check on GitHub, the app makes no network requests of its own. The AI features run the user's Codex CLI (`--ephemeral`, read-only sandbox) or Claude Code CLI (`--no-session-persistence`, no tools). The README's Privacy section describes this, so keep it accurate if it changes.
 - When a chat parser changes, bump `cacheVersion` in `PromptLibrary.swift`, so cached results get parsed again.
 - When an agent's folders or read rules change in `Tool`, update the agents table in the README.
-- Never use real skills or chats in screenshots, the banner or demos. `scripts/screenshot.sh` builds made-up ones in `build/demo-home`, under its own bundle ID. Test adding and uninstalling against a made-up home too, since `Paths.home` follows `$HOME`. The uninstalled test copies still go to the real Trash, so clean them up.
+- Never use real skills or chats in screenshots, the banner or demos. `scripts/screenshot.sh` builds made-up ones in `build/demo-home`, under its own bundle ID. Test adding, uninstalling, renaming and merging against a made-up home too, since `Paths.home` follows `$HOME`. The Codex and Claude Code CLIs can't log in under a made-up home, so a merge test drafts with the real `HOME` and applies under the made-up one. Test copies still go to the real Trash, so clean them up. The shell can't list `~/.Trash`, but Finder can: `osascript -e 'tell application "Finder" to get name of every item of trash'`.
 - Verify UI changes by building the app and opening it.
 - The app isn't sandboxed, because it reads folders across the home folder, and has no Developer ID. Releases are ad-hoc signed and not notarized.
 - The updater trusts the GitHub release. Every release needs its `vX.Y.Z` tag, the zip from `scripts/build-release.sh` attached, and a `MARKETING_VERSION` that matches the tag, or the app refuses the update. The update dialog shows the release notes above `## Install`, so the new features go first.

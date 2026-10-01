@@ -11,6 +11,7 @@ struct SkillList: View {
     }
     .contextMenu(forSelectionType: Skill.ID.self) { ids in
       if let skill = store.skill(ids.first), skill.isPersonal {
+        Button("Rename…") { store.renaming = skill }
         Button("Uninstall", role: .destructive) { store.removal = .uninstall(skill) }
       }
     }
@@ -212,7 +213,10 @@ struct SkillDetail: View {
           .foregroundStyle(.orange)
       }
       if skill.isPersonal {
-        Button("Uninstall this skill", role: .destructive) { store.removal = .uninstall(skill) }
+        HStack(spacing: 10) {
+          Button("Rename…") { store.renaming = skill }
+          Button("Uninstall this skill", role: .destructive) { store.removal = .uninstall(skill) }
+        }
       } else if let plugin = skill.copies.first(where: { $0.root.kind == .plugin }) {
         Text("It comes from the \(plugin.sourceLabel), so uninstall the plugin to remove it.")
           .font(.callout)
@@ -276,5 +280,75 @@ struct Removal {
       )
     }
     return sentences.joined(separator: " ")
+  }
+}
+
+struct RenameSheet: View {
+  @Environment(AppStore.self) private var store
+  @Environment(\.dismiss) private var dismiss
+  let skill: Skill
+  @State private var name: String
+
+  init(skill: Skill) {
+    self.skill = skill
+    _name = State(initialValue: skill.name)
+  }
+
+  private var problem: String? {
+    name == skill.name ? nil : SkillInstaller.renameProblem(skill, to: name, among: store.skills)
+  }
+
+  private var note: String {
+    let folders = skill.removableCopies.count(where: { !$0.isSymlink })
+    let links = skill.removableCopies.count(where: \.isSymlink)
+    var what: [String] = []
+    if folders > 0 { what.append(folders == 1 ? "its folder" : "its \(folders) folders") }
+    if links > 0 { what.append(links == 1 ? "the link to it" : "the \(links) links to it") }
+    var sentences = ["Skillscout renames \(what.formatted(.list(type: .and))), and changes the name in SKILL.md."]
+
+    let targets = skill.linkTargetsKept(skill.removableCopies)
+    if !targets.isEmpty {
+      sentences.append("\(targets.map(Paths.abbreviate).formatted(.list(type: .and))), where the links point, \(targets.count == 1 ? "keeps its" : "keep their") folder name.")
+    }
+    if let plugin = skill.copies.first(where: { $0.root.kind == .plugin }) {
+      sentences.append("The copy from the \(plugin.sourceLabel) keeps the old name.")
+    }
+    sentences.append("Chats that used \(skill.name) still count.")
+    return sentences.joined(separator: " ")
+  }
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 14) {
+      Text("Rename \(skill.name)")
+        .font(.headline)
+      TextField("Name", text: $name)
+        .textFieldStyle(.roundedBorder)
+        .onSubmit(rename)
+      if let problem {
+        Text(problem)
+          .font(.callout)
+          .foregroundStyle(.red)
+      }
+      Text(note)
+        .font(.callout)
+        .foregroundStyle(.secondary)
+        .fixedSize(horizontal: false, vertical: true)
+      HStack {
+        Spacer()
+        Button("Cancel", role: .cancel) { dismiss() }
+          .keyboardShortcut(.cancelAction)
+        Button("Rename", action: rename)
+          .keyboardShortcut(.defaultAction)
+          .disabled(name == skill.name || problem != nil)
+      }
+    }
+    .padding(20)
+    .frame(width: 440)
+  }
+
+  private func rename() {
+    guard name != skill.name, problem == nil else { return }
+    dismiss()
+    Task { await store.rename(skill, to: name) }
   }
 }
