@@ -157,9 +157,7 @@ struct SimilarDetail: View {
               ProgressView().controlSize(.small)
             }
           }
-          TextEditor(text: Binding(get: { draft }, set: { store.mergeDrafts[plan.id] = $0 }))
-            .font(.system(.callout, design: .monospaced))
-            .scrollContentBackground(.hidden)
+          PlainTextEditor(text: Binding(get: { draft }, set: { store.mergeDrafts[plan.id] = $0 }))
             .frame(minHeight: 380)
             .padding(8)
             .background(RoundedRectangle(cornerRadius: 8).fill(.quaternary.opacity(0.5)))

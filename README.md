@@ -46,6 +46,7 @@ defaults write com.flaviocopes.skillscout AppUpdaterAutomaticChecks -bool false
 - **Missing somewhere** lists the skills at least one of your agents can't see
 - **Add to** links the skill folder into another agent's skills folder, so every agent loads the same file
 - **Uninstall** moves a skill to the Trash, from all your skills folders or from one of them
+- **Edit** changes a skill's `SKILL.md` right in the app, in every copy that has the same text
 - **Rename** gives a skill a new name in its folders, its links and its `SKILL.md`, and keeps its usage
 - **Similar skills** pairs the skills that read alike, and **Merge with AI** turns two of them into one
 - **Unused** lists the skills no chat touched in the last 60 days
@@ -107,9 +108,17 @@ Before anything moves, Skillscout tells you which agents will stop loading the s
 
 Plugin and built-in skills stay where they are. Their agents manage them, so uninstall the plugin to remove its skills.
 
+## Editing a skill
+
+Select a skill and click the edit button in the toolbar, or **Edit** above its `SKILL.md`. The editor keeps your quotes straight and your `--` as two hyphens, so the commands in a skill still run.
+
+Skillscout saves the text to every copy of the skill that had the same text. A copy with different text stays as it is, and so does a plugin copy. If an agent changes the `SKILL.md` while you're editing it, Skillscout tells you before it saves over that change.
+
+The name in the frontmatter stays as it is, since a new name also means new folders. Use **Rename** for that. **Open in editor** opens the file in your usual Markdown editor instead.
+
 ## Renaming a skill
 
-Select a skill and click the pencil in the toolbar, or **Rename…** under **Where it lives**. Names use lowercase letters, numbers and hyphens, like `release-notes`.
+Select a skill and click the rename button in the toolbar, or **Rename…** under **Where it lives**. Names use lowercase letters, numbers and hyphens, like `release-notes`.
 
 Skillscout renames the skill's folders in your skills folders, creates its links again under the new name, and changes the `name` in its `SKILL.md`. A folder outside your skills folders, like a repo of skills your links point to, keeps its folder name. A plugin copy keeps the old name too.
 

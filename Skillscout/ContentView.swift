@@ -123,74 +123,60 @@ struct ContentView: View {
       selectedSkill = id
       store.revealRequest = nil
     }
-    .toolbar {
-      ToolbarItemGroup {
-        Button {
-          store.renaming = actionSkill
-        } label: {
-          Label("Rename", systemImage: "pencil")
-        }
-        .disabled(actionSkill == nil)
-        .help("Rename the selected skill")
-        Button {
-          if let skill = actionSkill { store.removal = .uninstall(skill) }
-        } label: {
-          Label("Uninstall", systemImage: "trash")
-        }
-        .disabled(actionSkill == nil)
-        .help("Uninstall the selected skill from every tool, by moving it to the Trash")
+    .toolbar { toolbar }
+    .modifier(Presentations(store: store))
+  }
+
+  @ToolbarContentBuilder
+  private var toolbar: some ToolbarContent {
+    ToolbarItemGroup {
+      Button {
+        store.editing = actionSkill
+      } label: {
+        Label("Edit", systemImage: "square.and.pencil")
       }
-      ToolbarItem {
-        Picker("Sort", selection: $sort) {
-          Text("Newest first").tag(SkillSort.newest)
-          Text("Sort by name").tag(SkillSort.name)
-          Text("Sort by use").tag(SkillSort.use)
-        }
-        .pickerStyle(.menu)
-        .disabled(!(sidebar?.listsSkills ?? true))
-        .help("Sort skills by when you created them, by name, or by how often they're used")
+      .disabled(actionSkill == nil)
+      .help("Edit the selected skill's SKILL.md")
+      Button {
+        store.renaming = actionSkill
+      } label: {
+        Label("Rename", systemImage: "character.cursor.ibeam")
       }
-      ToolbarItem {
-        Toggle(isOn: $showPluginSkills) {
-          Label("Plugin and built-in skills", systemImage: "puzzlepiece.extension")
-        }
-        .help("Show plugin and built-in skills too")
+      .disabled(actionSkill == nil)
+      .help("Rename the selected skill")
+      Button {
+        if let skill = actionSkill { store.removal = .uninstall(skill) }
+      } label: {
+        Label("Uninstall", systemImage: "trash")
       }
-      ToolbarItem {
-        Button {
-          sidebar = .suggestions
-          Task { await store.analyze() }
-        } label: {
-          Label("Find repeated tasks", systemImage: "sparkle.magnifyingglass")
-        }
-        .disabled(store.isAnalyzing || store.prompts.isEmpty)
-        .help("Analyze your recent chats and suggest new skills")
-      }
+      .disabled(actionSkill == nil)
+      .help("Uninstall the selected skill from every tool, by moving it to the Trash")
     }
-    .alert("Something went wrong", isPresented: Binding(
-      get: { store.errorMessage != nil },
-      set: { if !$0 { store.errorMessage = nil } }
-    )) {
-      Button("OK") {}
-    } message: {
-      Text(store.errorMessage ?? "")
-    }
-    .confirmationDialog(
-      store.removal?.title ?? "",
-      isPresented: Binding(
-        get: { store.removal != nil },
-        set: { if !$0 { store.removal = nil } }
-      ),
-      presenting: store.removal
-    ) { removal in
-      Button("Move to Trash", role: .destructive) {
-        Task { await store.remove(removal.copies) }
+    ToolbarItem {
+      Picker("Sort", selection: $sort) {
+        Text("Newest first").tag(SkillSort.newest)
+        Text("Sort by name").tag(SkillSort.name)
+        Text("Sort by use").tag(SkillSort.use)
       }
-    } message: { removal in
-      Text(removal.message(tools: store.tools))
+      .pickerStyle(.menu)
+      .disabled(!(sidebar?.listsSkills ?? true))
+      .help("Sort skills by when you created them, by name, or by how often they're used")
     }
-    .sheet(item: Binding(get: { store.renaming }, set: { store.renaming = $0 })) { skill in
-      RenameSheet(skill: skill)
+    ToolbarItem {
+      Toggle(isOn: $showPluginSkills) {
+        Label("Plugin and built-in skills", systemImage: "puzzlepiece.extension")
+      }
+      .help("Show plugin and built-in skills too")
+    }
+    ToolbarItem {
+      Button {
+        sidebar = .suggestions
+        Task { await store.analyze() }
+      } label: {
+        Label("Find repeated tasks", systemImage: "sparkle.magnifyingglass")
+      }
+      .disabled(store.isAnalyzing || store.prompts.isEmpty)
+      .help("Analyze your recent chats and suggest new skills")
     }
   }
 
@@ -277,5 +263,38 @@ struct StatusPanel: View {
     }
     .padding(12)
     .frame(maxWidth: .infinity, alignment: .leading)
+  }
+}
+
+/// The error alert, the uninstall confirmation and the sheets.
+private struct Presentations: ViewModifier {
+  @Bindable var store: AppStore
+
+  func body(content: Content) -> some View {
+    content
+      .alert("Something went wrong", isPresented: Binding(
+        get: { store.errorMessage != nil },
+        set: { if !$0 { store.errorMessage = nil } }
+      )) {
+        Button("OK") {}
+      } message: {
+        Text(store.errorMessage ?? "")
+      }
+      .confirmationDialog(
+        store.removal?.title ?? "",
+        isPresented: Binding(
+          get: { store.removal != nil },
+          set: { if !$0 { store.removal = nil } }
+        ),
+        presenting: store.removal
+      ) { removal in
+        Button("Move to Trash", role: .destructive) {
+          Task { await store.remove(removal.copies) }
+        }
+      } message: { removal in
+        Text(removal.message(tools: store.tools))
+      }
+      .sheet(item: $store.renaming) { RenameSheet(skill: $0) }
+      .sheet(item: $store.editing) { EditSheet(skill: $0) }
   }
 }

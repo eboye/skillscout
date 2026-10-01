@@ -30,6 +30,7 @@ final class AppStore {
   var removal: Removal?
   /// The skill whose new name you're typing.
   var renaming: Skill?
+  var editing: Skill?
   /// A skill to select once it has a new name, or once a merge made it.
   var revealRequest: Skill.ID?
 
@@ -211,6 +212,12 @@ final class AppStore {
       errorMessage = error.localizedDescription
       await refreshSkills()
     }
+  }
+
+  /// Throws instead of showing an alert, so the editor stays open with your text.
+  func save(_ edit: SkillInstaller.Edit, text: String, overwrite: Bool) async throws {
+    try SkillInstaller.save(edit, text: text, overwrite: overwrite)
+    await refreshSkills()
   }
 
   func dismissPair(_ pair: SimilarPair) {

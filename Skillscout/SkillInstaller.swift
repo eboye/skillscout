@@ -10,16 +10,76 @@ enum SkillInstaller {
     case alreadyExists(URL)
     case builtIn(String)
     case managed(URL)
-    case badName(String)
+    case changedOnDisk(URL)
+    case problem(String)
 
     var errorDescription: String? {
       switch self {
       case .alreadyExists(let url): "\(Paths.abbreviate(url)) already exists."
       case .builtIn(let name): "\(name) is built into its tool and can't be moved."
       case .managed(let url): "\(Paths.abbreviate(url)) belongs to a plugin or to its tool, so Skillscout leaves it alone."
-      case .badName(let problem): problem
+      case .changedOnDisk(let url): "\(Paths.abbreviate(url)) changed since you started editing it."
+      case .problem(let problem): problem
       }
     }
+  }
+
+  // MARK: - Edit
+
+  /// An edit of a skill's SKILL.md. It covers every personal copy with the same text, so they stay alike.
+  struct Edit: Sendable {
+    let skill: Skill
+    let files: [URL]
+    let original: String
+    /// Personal copies whose SKILL.md has other text. The edit leaves them as they are.
+    let otherFiles: [URL]
+  }
+
+  static func edit(_ skill: Skill) throws -> Edit {
+    let copies = skill.removableCopies.filter { !isManaged($0.resolved) }
+    guard let source = copies.first else { throw Failure.managed(skill.primary.resolved) }
+    let original = try String(contentsOf: skillFile(source), encoding: .utf8)
+    var files: [URL] = []
+    var otherFiles: [URL] = []
+    for file in copies.map(skillFile) where !files.contains(file) && !otherFiles.contains(file) {
+      if (try? String(contentsOf: file, encoding: .utf8)) == original {
+        files.append(file)
+      } else {
+        otherFiles.append(file)
+      }
+    }
+    return Edit(skill: skill, files: files, original: original, otherFiles: otherFiles)
+  }
+
+  /// Why `text` can't be saved, or nil when it can. The name stays, since renaming moves folders too.
+  static func editProblem(_ edit: Edit, text: String) -> String? {
+    let meta = Frontmatter.parse(text)
+    let before = Frontmatter.parse(edit.original)
+    let name = meta["name"].flatMap { $0.isEmpty ? nil : $0 }
+    if name != edit.skill.name, name != nil || !before["name", default: ""].isEmpty {
+      return "Keep name: \(edit.skill.name) in the frontmatter. To change the name, use Rename."
+    }
+    if meta["description", default: ""].isEmpty, !before["description", default: ""].isEmpty {
+      return "Keep a description in the frontmatter, so agents know when to use the skill."
+    }
+    return nil
+  }
+
+  /// Writes `text` into every SKILL.md of the edit. It stops when one of them changed since the edit started,
+  /// unless `overwrite` is set.
+  static func save(_ edit: Edit, text: String, overwrite: Bool = false) throws {
+    if let problem = editProblem(edit, text: text) { throw Failure.problem(problem) }
+    if !overwrite, let changed = edit.files.first(where: { (try? String(contentsOf: $0, encoding: .utf8)) != edit.original }) {
+      throw Failure.changedOnDisk(changed)
+    }
+    for file in edit.files {
+      try text.write(to: file, atomically: true, encoding: .utf8)
+    }
+  }
+
+  /// The SKILL.md of a copy, with links followed, so writing it doesn't replace a link with a file.
+  private static func skillFile(_ copy: SkillCopy) -> URL {
+    copy.resolved.appending(path: "SKILL.md").resolvingSymlinksInPath()
   }
 
   // MARK: - Rename
@@ -45,7 +105,7 @@ enum SkillInstaller {
   /// under it, and each SKILL.md gets the new `name`. Plugin and built-in copies keep the old name, and so
   /// do the folders that links point to outside your skills folders.
   static func rename(_ skill: Skill, to name: String, among skills: [Skill]) throws {
-    if let problem = renameProblem(skill, to: name, among: skills) { throw Failure.badName(problem) }
+    if let problem = renameProblem(skill, to: name, among: skills) { throw Failure.problem(problem) }
     let copies = skill.removableCopies
     guard !copies.isEmpty else { throw Failure.managed(skill.primary.folder) }
     if let managed = copies.first(where: { isManaged($0.resolved) }) { throw Failure.managed(managed.resolved) }
@@ -103,7 +163,7 @@ enum SkillInstaller {
   }
 
   static func planMerge(_ merged: Skill, into kept: Skill) throws -> MergePlan {
-    guard merged != kept else { throw Failure.badName("A skill can't be merged into itself.") }
+    guard merged != kept else { throw Failure.problem("A skill can't be merged into itself.") }
     guard let keptCopy = kept.removableCopies.first else { throw Failure.managed(kept.primary.folder) }
     guard let mergedCopy = merged.removableCopies.first(where: { !$0.isSymlink }) ?? merged.removableCopies.first else {
       throw Failure.managed(merged.primary.folder)
