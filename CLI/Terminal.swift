@@ -101,14 +101,4 @@ extension Tool {
     case .amp: "Am"
     }
   }
-
-  /// Accepts `claude`, `claude-code`, `"Claude Code"`, `gemini`, `gemini-cli` and so on.
-  init?(argument: String) {
-    let key = argument.lowercased().replacingOccurrences(of: " ", with: "-")
-    let match = Tool.allCases.first { tool in
-      [tool.rawValue, tool.name.lowercased().replacingOccurrences(of: " ", with: "-")].contains(key)
-    }
-    guard let match else { return nil }
-    self = match
-  }
 }

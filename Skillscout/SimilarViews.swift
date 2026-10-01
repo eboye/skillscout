@@ -55,15 +55,11 @@ struct SimilarRow: View {
 struct SimilarDetail: View {
   @Environment(AppStore.self) private var store
   let pair: SimilarPair
-  @State private var keep: Skill.ID
   @State private var plan: SkillInstaller.MergePlan?
   @State private var planProblem: String?
   @State private var confirming = false
 
-  init(pair: SimilarPair, keep: Skill.ID) {
-    self.pair = pair
-    _keep = State(initialValue: keep)
-  }
+  private var keep: Skill.ID { store.keep(for: pair) }
 
   private var isDrafting: Bool { plan.map { store.busy.contains("merge:\($0.id)") } ?? false }
 
@@ -108,7 +104,7 @@ struct SimilarDetail: View {
       isPresented: $confirming,
       presenting: plan
     ) { plan in
-      Button("Merge") { Task { await store.merge(plan) } }
+      Button("Merge") { store.perform { try await store.merge(plan) } }
     } message: { plan in
       Text(plan.message(tools: store.tools))
     }
@@ -130,7 +126,7 @@ struct SimilarDetail: View {
     VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 10) {
         Text("Keep the name")
-        Picker("Keep the name", selection: $keep) {
+        Picker("Keep the name", selection: Binding(get: { keep }, set: { store.mergeKeep[pair.id] = $0 })) {
           Text(pair.first).tag(pair.first)
           Text(pair.second).tag(pair.second)
         }
@@ -151,7 +147,7 @@ struct SimilarDetail: View {
           HStack(spacing: 10) {
             Button("Merge into \(plan.kept.name)") { confirming = true }
               .disabled(isDrafting)
-            Button("Redraft") { Task { await store.draftMerge(plan) } }
+            Button("Redraft") { store.perform { try await store.draftMerge(plan) } }
               .disabled(isDrafting)
             if isDrafting {
               ProgressView().controlSize(.small)
@@ -168,7 +164,7 @@ struct SimilarDetail: View {
           }
         } else {
           Button {
-            Task { await store.draftMerge(plan) }
+            store.perform { try await store.draftMerge(plan) }
           } label: {
             Label("Merge with AI", systemImage: "sparkles")
           }

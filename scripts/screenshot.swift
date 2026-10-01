@@ -291,13 +291,12 @@ final class ActiveWindow: NSWindow {
 func capture(_ store: AppStore, host: NSHostingController<AnyView>, window: NSWindow) async {
   await store.start()
   fill(store)
-  let scenes: [(String, AnyView)] = [
-    ("", AnyView(ContentView(skill: "writing-style").id("skills").environment(store))),
-    ("-suggestions", AnyView(ContentView(sidebar: .suggestions, suggestion: store.suggestions.first?.id).id("suggestions").environment(store))),
-  ]
+  store.selectedSkill = "writing-style"
+  store.selectedSuggestion = store.suggestions.first?.id
+  host.rootView = AnyView(ContentView().environment(store))
 
-  for (suffix, view) in scenes {
-    host.rootView = view
+  for (suffix, place) in [("", SidebarItem.allSkills), ("-suggestions", .suggestions)] {
+    store.place = place
     for (name, appearance) in [("light", NSAppearance.Name.aqua), ("dark", .darkAqua)] {
       NSApp.appearance = NSAppearance(named: appearance)
       try? await Task.sleep(for: .seconds(1.5))

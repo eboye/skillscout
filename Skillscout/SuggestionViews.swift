@@ -19,7 +19,7 @@ struct SuggestionList: View {
             : "Skillscout reads your recent messages and finds tasks you ask for again and again.")
         } actions: {
           if !store.isAnalyzing {
-            Button("Analyze now") { Task { await store.analyze() } }
+            Button("Analyze now") { store.perform { try await store.analyze() } }
               .disabled(store.prompts.isEmpty)
           }
         }
@@ -130,14 +130,14 @@ struct SuggestionDetail: View {
             Menu("Save to all tools") {
               ForEach(store.tools) { tool in
                 Button("Save to \(tool.name) only") {
-                  Task { await store.save(suggestion.id, to: .tool(tool)) }
+                  store.perform { try await store.save(suggestion.id, to: .tool(tool)) }
                 }
               }
             } primaryAction: {
-              Task { await store.save(suggestion.id, to: .everywhere(store.tools)) }
+              store.perform { try await store.save(suggestion.id, to: .everywhere(store.tools)) }
             }
             .fixedSize()
-            Button("Redraft") { Task { await store.draft(suggestion.id) } }
+            Button("Redraft") { store.perform { try await store.draft(suggestion.id) } }
               .disabled(isDrafting)
             if isDrafting {
               ProgressView().controlSize(.small)
@@ -155,7 +155,7 @@ struct SuggestionDetail: View {
       }
     } else {
       Button {
-        Task { await store.draft(suggestion.id) }
+        store.perform { try await store.draft(suggestion.id) }
       } label: {
         Label("Draft the skill with AI", systemImage: "sparkles")
       }

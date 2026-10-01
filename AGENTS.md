@@ -1,6 +1,6 @@
 # Skillscout
 
-A SwiftUI macOS app, plus a `skillscout` command-line tool, that lists the skills of 8 coding agents, counts their use from local chats, and asks AI for new skill ideas. No dependencies, no tests yet.
+A SwiftUI macOS app, plus a `skillscout` command-line tool, that lists the skills of 8 coding agents, counts their use from local chats, and asks AI for new skill ideas. A second command, `skillscoutctl`, drives the running app for agents. No dependencies, no tests yet.
 
 The app and the command share these core files, which only import Foundation, CryptoKit and SQLite3:
 
@@ -12,10 +12,13 @@ The app and the command share these core files, which only import Foundation, Cr
 - `Skillscout/SkillInstaller.swift`: adds a skill to another agent with a symlink (or a copy for plugin skills), saves drafted skills, edits, renames and merges skills, and moves skills to the Trash.
 - `Skillscout/Analyzer.swift`: the prompts for skill ideas, drafts, explanations and merges, and the parsing of the replies.
 - `Skillscout/AIEngine.swift`: runs the Codex or Claude Code CLI with the user's login shell `PATH`.
+- `Skillscout/SkillJSON.swift`: the JSON of a skill, for `skillscout --json` and `skillscoutctl`.
+- `Skillscout/Control.swift`: the socket `skillscoutctl` and the app talk through, one JSON request per connection. It's in your private temporary folder, named after the home folder.
 
 App only:
 
-- `Skillscout/AppStore.swift`: the observable state, loading, the file watcher hookup, the AI actions and `state.json`.
+- `Skillscout/AppStore.swift`: the observable state, loading, the file watcher hookup, the actions and `state.json`. It also holds what the window shows (the sidebar place, the selection, the search and the sort), so `skillscoutctl` can change it.
+- `Skillscout/ControlServer.swift` and `Skillscout/AppControl.swift`: listen on the socket, and run each `skillscoutctl` command on the store. `WindowCapture` draws the window and its sheets for screenshots.
 - `Skillscout/FileWatcher.swift`: the FSEvents stream on the agents' folders.
 - `Skillscout/ContentView.swift`: the split view, the sidebar, the toolbar and the status panel.
 - `Skillscout/SkillViews.swift`, `Skillscout/SuggestionViews.swift` and `Skillscout/SimilarViews.swift`: the lists and detail panes, plus the rename sheet.
@@ -26,6 +29,8 @@ App only:
 
 Command only: `CLI/main.swift` (arguments and help), `CLI/Commands.swift`, `CLI/Library.swift` (loads skills and chats, JSON output), `CLI/Terminal.swift`.
 
+`skillscoutctl` only: `Ctl/main.swift`, with the commands, their help, and starting the app when it isn't running.
+
 ## Build and run
 
 Requirements: macOS 15 or later, Xcode 26 (the `.icon` needs it), and XcodeGen after editing `project.yml`.
@@ -34,13 +39,14 @@ Requirements: macOS 15 or later, Xcode 26 (the `.icon` needs it), and XcodeGen a
 scripts/build-release.sh           # universal Release build, dist/Skillscout-<version>.zip
 open build/release/Release/Skillscout.app
 build/release/Release/Skillscout.app/Contents/Helpers/skillscout list
+scripts/test-app.sh                # Debug test copy on build/test-home, prints its skillscoutctl
 xcodegen generate                  # after editing project.yml
 swift scripts/render-icon.swift    # after editing the icon
 scripts/screenshot.sh              # docs/screenshot-*.png, from a demo home folder
 swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark screenshot
 ```
 
-`project.yml` is the source of the Xcode project, so edit it and regenerate instead of changing `project.pbxproj` by hand. The version lives in its `MARKETING_VERSION`, and every release also bumps the build number in `CURRENT_PROJECT_VERSION`. A new file the command needs goes in the `SkillscoutCLI` sources list there, and it can't import SwiftUI or AppKit.
+`project.yml` is the source of the Xcode project, so edit it and regenerate instead of changing `project.pbxproj` by hand. The version lives in its `MARKETING_VERSION`, and every release also bumps the build number in `CURRENT_PROJECT_VERSION`. A new file the command needs goes in the `SkillscoutCLI` sources list there, and it can't import SwiftUI or AppKit. `SkillscoutCtl` compiles only `Ctl/`, `Models.swift` and `Control.swift`.
 
 ## Rules
 
@@ -50,8 +56,9 @@ swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark
 - Apart from the daily update check on GitHub, the app makes no network requests of its own. The AI features run the user's Codex CLI (`--ephemeral`, read-only sandbox) or Claude Code CLI (`--no-session-persistence`, no tools). The README's Privacy section describes this, so keep it accurate if it changes.
 - When a chat parser changes, bump `cacheVersion` in `PromptLibrary.swift`, so cached results get parsed again.
 - When an agent's folders or read rules change in `Tool`, update the agents table in the README.
-- Never use real skills or chats in screenshots, the banner or demos. `scripts/screenshot.sh` builds made-up ones in `build/demo-home`, under its own bundle ID. Test adding, uninstalling, renaming and merging against a made-up home too, since `Paths.home` follows `$HOME`. The Codex and Claude Code CLIs can't log in under a made-up home, so a merge test drafts with the real `HOME` and applies under the made-up one. Test copies still go to the real Trash, so clean them up. The shell can't list `~/.Trash`, but Finder can: `osascript -e 'tell application "Finder" to get name of every item of trash'`.
-- Verify UI changes by building the app and opening it.
+- Never use real skills or chats in screenshots, the banner or demos. `scripts/screenshot.sh` builds made-up ones in `build/demo-home`, under its own bundle ID. Test adding, uninstalling, renaming and merging against a made-up home too, since `Paths.home` follows `$HOME`. `UserDefaults` don't follow `$HOME`, so a copy of the app on a made-up home needs its own bundle ID, or it shares the real app's settings. `skillscoutctl` refuses to start the real bundle on a made-up home. The Codex and Claude Code CLIs can't log in under a made-up home, so a merge test drafts with the real `HOME` and applies under the made-up one. Test copies still go to the real Trash, so clean them up. The shell can't list `~/.Trash`, but Finder can: `osascript -e 'tell application "Finder" to get name of every item of trash'`.
+- Verify UI changes with `scripts/test-app.sh`. It builds Skillscout Test, with the bundle ID `com.flaviocopes.skillscout.test`, resets `build/test-home`, and starts the copy there. Drive it with the `skillscoutctl` it prints: `view` and `open` to get to the change, `screenshot` to save a PNG you can read, and `state` to check the selection, the list and the sheets.
+- Every action in the window has a `skillscoutctl` command. A new button needs its command in `AppControl.swift` and its `Spec` in `Ctl/main.swift`. Its store method throws, and the button calls it through `store.perform`, so the window shows the error in an alert and the command prints it.
 - The app isn't sandboxed, because it reads folders across the home folder, and has no Developer ID. Releases are ad-hoc signed and not notarized.
 - The updater trusts the GitHub release. Every release needs its `vX.Y.Z` tag, the zip from `scripts/build-release.sh` attached, and a `MARKETING_VERSION` that matches the tag, or the app refuses the update. The update dialog shows the release notes above `## Install`, so the new features go first.
 - The 1-minute demo video comes from the separate Remotion project `~/dev/skillscout-showreel`. It's not part of this repo.
