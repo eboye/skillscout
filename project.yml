@@ -19,11 +19,6 @@ targets:
         copy:
           destination: wrapper
           subpath: Contents/Helpers
-      - target: SkillscoutCtl
-        embed: true
-        copy:
-          destination: wrapper
-          subpath: Contents/Helpers
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.flaviocopes.skillscout
@@ -46,27 +41,10 @@ targets:
       - Skillscout/SkillInstaller.swift
       - Skillscout/Analyzer.swift
       - Skillscout/AIEngine.swift
-      - Skillscout/SkillJSON.swift
     settings:
       base:
         PRODUCT_NAME: skillscout
         PRODUCT_BUNDLE_IDENTIFIER: com.flaviocopes.skillscout.cli
-        GENERATE_INFOPLIST_FILE: YES
-        CREATE_INFOPLIST_SECTION_IN_BINARY: YES
-        SKIP_INSTALL: YES
-        CODE_SIGN_IDENTITY: "-"
-        CODE_SIGN_STYLE: Manual
-  SkillscoutCtl:
-    type: tool
-    platform: macOS
-    sources:
-      - Ctl
-      - Skillscout/Models.swift
-      - Skillscout/Control.swift
-    settings:
-      base:
-        PRODUCT_NAME: skillscoutctl
-        PRODUCT_BUNDLE_IDENTIFIER: com.flaviocopes.skillscout.ctl
         GENERATE_INFOPLIST_FILE: YES
         CREATE_INFOPLIST_SECTION_IN_BINARY: YES
         SKIP_INSTALL: YES

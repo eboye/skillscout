@@ -1,6 +1,6 @@
 #!/bin/sh
-# Builds a universal (Apple silicon and Intel) Skillscout.app, with the skillscout and
-# skillscoutctl commands inside, and an ad-hoc signature. Checks the signature survives zipping, and writes
+# Builds a universal (Apple silicon and Intel) Skillscout.app, with the skillscout command
+# inside, and an ad-hoc signature. Checks the signature survives zipping, and writes
 # dist/Skillscout-<version>.zip. The name and version come from project.yml.
 # Usage: scripts/build-release.sh
 set -eu
@@ -21,7 +21,6 @@ xcodebuild -project "$NAME.xcodeproj" -target "$NAME" -configuration Release \
 
 lipo "$APP/Contents/MacOS/$NAME" -verify_arch arm64 x86_64
 lipo "$APP/Contents/Helpers/skillscout" -verify_arch arm64 x86_64
-lipo "$APP/Contents/Helpers/skillscoutctl" -verify_arch arm64 x86_64
 codesign --verify --deep --strict "$APP"
 
 ditto -c -k --keepParent "$APP" "$ZIP"

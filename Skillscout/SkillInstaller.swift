@@ -152,9 +152,7 @@ enum SkillInstaller {
     /// The skills folders that get a link to the kept skill in place of the merged one, so no tool loses it.
     let linkRoots: [SkillRoot]
 
-    var id: String { Self.id(merging: merged.id, into: kept.id) }
-
-    static func id(merging merged: Skill.ID, into kept: Skill.ID) -> String { "\(merged)>\(kept)" }
+    var id: String { "\(merged.name)>\(kept.name)" }
 
     var links: [URL] { linkRoots.map { $0.url.appending(path: kept.name) } }
 
@@ -241,33 +239,6 @@ enum SkillInstaller {
     return SkillRoot.all.contains { root in
       root.kind != .user && root.kind != .shared && path.hasPrefix(root.url.resolvingSymlinksInPath().path + "/")
     }
-  }
-
-  /// The copies that uninstalling moves to the Trash: every copy in your skills folders, or only the one
-  /// in `tool`'s skills folder and the links to it.
-  static func removal(of skill: Skill, from tool: Tool? = nil) throws -> [SkillCopy] {
-    var copies = skill.removableCopies
-    if let tool {
-      guard let copy = copies.first(where: { $0.root.url == tool.skillsFolder }) else {
-        let source = skill.provider(for: tool).map { provider in
-          " \(tool.name) loads it from \(provider.root.kind == .plugin ? "the \(provider.sourceLabel)" : Paths.abbreviate(provider.root.url))."
-        }
-        throw Failure.problem("\(skill.name) isn't in \(Paths.abbreviate(tool.skillsFolder)).\(source ?? "")")
-      }
-      copies = skill.copiesGoing(with: copy)
-    }
-    guard !copies.isEmpty else {
-      throw Failure.problem(skill.isBuiltInOnly
-        ? "\(skill.name) is built into \(skill.primary.root.owner?.name ?? "its tool"), so it stays."
-        : "\(skill.name) comes from the \(skill.primary.sourceLabel), so uninstall the plugin to remove it.")
-    }
-    return copies
-  }
-
-  /// The error for renaming, editing or merging a skill that a plugin or a tool manages.
-  static func leftAlone(_ skill: Skill) -> Failure {
-    let owner = skill.isBuiltInOnly ? skill.primary.root.owner?.name ?? "its tool" : "the \(skill.primary.sourceLabel)"
-    return .problem("\(skill.name) belongs to \(owner), so Skillscout leaves it alone.")
   }
 
   /// Moves the copies to the Trash, so you can put them back from there. A link goes on its own,

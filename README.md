@@ -166,7 +166,7 @@ After your first run, Skillscout analyzes again on its own once you've sent 40 n
 
 ## The command line tool
 
-Skillscout comes with a `skillscout` command. To install it, open the Skillscout menu and choose **Install Command Line Tool…**. It links `skillscout` and `skillscoutctl` from inside the app into `/usr/local/bin`, and asks for your password if that folder needs it.
+Skillscout comes with a `skillscout` command. To install it, open the Skillscout menu and choose **Install Command Line Tool…**. It links the command inside the app into `/usr/local/bin`, and asks for your password if that folder needs it.
 
 The command reads the same skills and chats as the app, and follows its settings, like which agents are on and how many days of chats to read.
 
@@ -283,62 +283,6 @@ Most commands take `--json`, so you can use Skillscout from scripts:
 skillscout list --unused --json
 ```
 
-## Driving the app from an agent
-
-`skillscout` reads your skills on its own, without the app. `skillscoutctl` drives the running app instead, so an agent can do what you do in its window. It can select a skill, open the rename sheet, merge two skills, and take a screenshot to check the result. Every command prints JSON.
-
-```sh
-skillscoutctl view similar writing-style email-style
-skillscoutctl screenshot ~/Desktop/similar.png
-```
-
-When the app isn't running, the first command starts it in the background and waits until it has read your skills and chats.
-
-`state` tells an agent what's on screen: the place in the sidebar, the selected skill, the names listed, the open sheets and alerts, and what AI is working on.
-
-```sh
-skillscoutctl state
-```
-
-```json
-{
-  "listed" : ["cloudflare-deploy", "commit-and-push", "release-notes"],
-  "place" : "all",
-  "presented" : [{ "kind" : "rename", "skill" : "release-notes" }],
-  "search" : "",
-  "selected" : { "skill" : "release-notes" },
-  "working" : ["Explaining writing-style"]
-}
-```
-
-That's a trimmed version. The full one also has the count of every place, the chats read, and the window's size and appearance.
-
-| Command | What it does |
-| --- | --- |
-| `skillscoutctl state` | What the window shows |
-| `skillscoutctl list`, `show`, `similar`, `suggestions` | The skills, pairs and ideas the window lists |
-| `skillscoutctl view <place> <skill>` | Shows a place in the sidebar and selects a skill, an idea or a pair |
-| `skillscoutctl open edit <skill>` | Opens the edit, rename or uninstall sheet, or Settings |
-| `skillscoutctl close` | Closes the sheets, alerts and Settings |
-| `skillscoutctl screenshot [file]` | Saves a PNG of the window, with its sheets |
-| `skillscoutctl window --size 1180x760 --appearance dark` | Resizes the window, or switches it to dark |
-| `skillscoutctl add`, `uninstall`, `rename`, `edit`, `merge` | Change your skills, like the buttons do |
-| `skillscoutctl explain`, `analyze`, `draft`, `save`, `dismiss` | The AI features and the skill ideas |
-| `skillscoutctl settings days 90` | Prints the settings, or changes one |
-| `skillscoutctl launch`, `refresh`, `quit` | Starts the app, reads everything again, or quits |
-
-Run `skillscoutctl help <command>` for the arguments of each one.
-
-The commands that change skills skip the confirmation, since an agent can't click a dialog. They follow the app's rules: uninstalling and merging move files to the Trash, and plugin and built-in skills stay as they are. If you'd rather confirm yourself, have the agent run `open uninstall <skill>` and click the button.
-
-`edit` and `merge` take `--file` with the new `SKILL.md`, or `--file -` to read it from stdin. Without `--file`, `merge` asks AI to write it, like **Merge with AI** does:
-
-```sh
-skillscoutctl merge writing-style email-style --file merged.md
-```
-
-Errors go to stderr with exit code 1, and they say what to run instead.
-
 ## Privacy
 
 Skillscout reads your skill folders and your chats on your Mac, and has no accounts or analytics. The only request it makes on its own goes to GitHub: once a day, it asks whether there's a newer version of Skillscout, and it downloads one only when you click **Install and Relaunch**.
@@ -346,8 +290,6 @@ Skillscout reads your skill folders and your chats on your Mac, and has no accou
 Your chats leave your Mac only through the AI features. **Explain with AI**, **Find repeated tasks**, **Draft the skill with AI** and **Merge with AI** run the Codex CLI or the Claude Code CLI you're already logged in to, so the prompt goes to OpenAI or Anthropic under your own account. To find skill ideas, that prompt includes up to 2,000 of your recent messages, each cut to 220 characters, with the agent and project it came from. To merge two skills, it includes both `SKILL.md` files and the names of their other files.
 
 Skillscout runs Codex with `--ephemeral` in a read-only sandbox, and Claude Code with `--no-session-persistence` and no tools. These runs don't show up in your chat history.
-
-`skillscoutctl` talks to the app through a socket file in your private temporary folder. Only your user can open it, and nothing goes over the network.
 
 Skillscout keeps its own data in `~/Library/Application Support/Skillscout`. There's a cache of the chats it parsed, and the explanations, ideas and drafts it saved. It also remembers the old names of the skills you renamed or merged, so their chats keep counting.
 
@@ -363,7 +305,7 @@ scripts/build-release.sh
 
 It builds a universal app in `build/release/Release/Skillscout.app`, checks its signature, and zips it into `dist/`. The app is ad-hoc signed. A copy you build yourself opens without a warning.
 
-The `skillscout` command is its own target, `SkillscoutCLI`, and so is `skillscoutctl`, in `SkillscoutCtl`. The app embeds both in `Contents/Helpers`. To build only the command:
+The `skillscout` command is its own target, `SkillscoutCLI`, and the app embeds it in `Contents/Helpers`. To build only the command:
 
 ```sh
 xcodebuild -project Skillscout.xcodeproj -target SkillscoutCLI -configuration Release build
@@ -377,16 +319,7 @@ The Xcode project is generated from `project.yml` with [XcodeGen](https://github
 xcodegen generate
 ```
 
-The command line tool shares the app's core files: the models, the skill scanner, the chat readers, the installer, the similarity check and the AI engine. Its own code lives in `CLI/`, and `skillscoutctl` lives in `Ctl/`.
-
-To try a change, run `scripts/test-app.sh`. It builds a copy called Skillscout Test, with its own bundle ID and settings, and starts it on made-up skills and chats in `build/test-home`. Then it prints the `skillscoutctl` command that drives the copy:
-
-```sh
-scripts/test-app.sh
-HOME=$PWD/build/test-home build/test-app/Debug/Skillscout.app/Contents/Helpers/skillscoutctl screenshot /tmp/skillscout.png
-```
-
-Every run starts from a fresh made-up home. Your real skills, chats and settings stay as they are, but uninstalling and merging still use the real Trash.
+The command line tool shares the app's core files: the models, the skill scanner, the chat readers, the installer, the similarity check and the AI engine. Its own code lives in `CLI/`.
 
 The app icon is drawn in code. Edit `scripts/render-icon.swift`, then write a new `Skillscout/AppIcon.icon`:
 

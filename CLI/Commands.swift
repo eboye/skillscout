@@ -308,7 +308,22 @@ enum Commands {
     let library = await Library.load(days: args.days, readChats: false)
     let skill = try library.skill(named: name)
 
-    let removed = try SkillInstaller.removal(of: skill, from: try args.tool("from"))
+    var removed = skill.removableCopies
+    if let tool = try args.tool("from") {
+      guard let copy = removed.first(where: { $0.root.url == tool.skillsFolder }) else {
+        let source = skill.provider(for: tool).map { provider in
+          " \(tool.name) loads it from \(provider.root.kind == .plugin ? "the \(provider.sourceLabel)" : Paths.abbreviate(provider.root.url))."
+        }
+        throw CLIError(message: "\(skill.name) isn't in \(Paths.abbreviate(tool.skillsFolder)).\(source ?? "")")
+      }
+      removed = skill.copiesGoing(with: copy)
+    }
+    guard !removed.isEmpty else {
+      throw CLIError(message: skill.isBuiltInOnly
+        ? "\(skill.name) is built into \(skill.primary.root.owner?.name ?? "its tool"), so it stays."
+        : "\(skill.name) comes from the \(skill.primary.sourceLabel), so uninstall the plugin to remove it.")
+    }
+
     try SkillInstaller.remove(removed)
     for copy in removed {
       print("Moved \(copy.isSymlink ? "the link " : "")\(Paths.abbreviate(copy.folder)) to the Trash")
@@ -332,7 +347,7 @@ enum Commands {
     let (name, newName) = try args.two("skill", "new name", example: "release-notes changelog")
     let library = await Library.load(days: args.days, readChats: false)
     let skill = try library.skill(named: name)
-    guard skill.isPersonal else { throw SkillInstaller.leftAlone(skill) }
+    guard skill.isPersonal else { throw leftAlone(skill) }
 
     try SkillInstaller.rename(skill, to: newName, among: library.skills)
     print("Renamed \(skill.name) to \(bold(newName)) in \(Terminal.list(skill.removableCopies.map { Paths.abbreviate($0.root.url) }))")
@@ -351,7 +366,7 @@ enum Commands {
     let library = await Library.load(days: args.days, readChats: false)
     let kept = try library.skill(named: keptName)
     let merged = try library.skill(named: mergedName)
-    for skill in [kept, merged] where !skill.isPersonal { throw SkillInstaller.leftAlone(skill) }
+    for skill in [kept, merged] where !skill.isPersonal { throw leftAlone(skill) }
     let plan = try SkillInstaller.planMerge(merged, into: kept)
 
     Terminal.status("Asking \(engine.kind.name) to merge \(merged.name) into \(kept.name)…")
@@ -376,6 +391,12 @@ enum Commands {
       print("Linked \(kept.name) into \(Paths.abbreviate(link.deletingLastPathComponent()))")
     }
     print(dim("The old SKILL.md is in the Trash too."))
+  }
+
+  /// The error for a skill that a plugin or a tool manages.
+  private static func leftAlone(_ skill: Skill) -> CLIError {
+    let owner = skill.isBuiltInOnly ? skill.primary.root.owner?.name ?? "its tool" : "the \(skill.primary.sourceLabel)"
+    return CLIError(message: "\(skill.name) belongs to \(owner), so Skillscout leaves it alone.")
   }
 
   static func suggest(_ args: Arguments) async throws {

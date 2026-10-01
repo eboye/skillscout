@@ -12,10 +12,7 @@ struct SkillscoutApp: App {
     Window("Skillscout", id: "main") {
       ContentView()
         .environment(store)
-        .task {
-          ControlServer.start(store: store)
-          await store.start()
-        }
+        .task { await store.start() }
     }
     .defaultSize(width: 1180, height: 760)
     .commands {

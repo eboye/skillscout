@@ -121,7 +121,7 @@ struct SkillDetail: View {
           .foregroundStyle(.secondary)
       } else {
         Button(skill.isPluginOnly ? "Copy to \(tool.name)" : "Add to \(tool.name)") {
-          store.perform { try await store.add(skill, to: tool) }
+          Task { await store.add(skill, to: tool) }
         }
         Text(skill.isPluginOnly ? "copies the folder into \(Paths.abbreviate(tool.skillsFolder))" : "links it into \(Paths.abbreviate(tool.skillsFolder))")
           .font(.caption)
@@ -175,7 +175,7 @@ struct SkillDetail: View {
       }
     } else {
       Button {
-        store.perform { try await store.explain(skill) }
+        Task { await store.explain(skill) }
       } label: {
         Label("Explain with AI", systemImage: "sparkles")
       }
@@ -355,7 +355,7 @@ struct RenameSheet: View {
   private func rename() {
     guard name != skill.name, problem == nil else { return }
     dismiss()
-    store.perform { try await store.rename(skill, to: name) }
+    Task { await store.rename(skill, to: name) }
   }
 }
 
