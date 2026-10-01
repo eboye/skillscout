@@ -55,7 +55,7 @@ defaults write com.flaviocopes.skillscout AppUpdaterAutomaticChecks -bool false
 - Search by name or description with `⌘F`
 - **Explain with AI** asks Claude Code or Codex what a skill does, when the agent uses it, and what it needs to work
 - **Suggestions** finds the tasks you keep asking for and drafts a `SKILL.md` for each one
-- Plugin and built-in skills from Cursor, Claude Code and Codex, behind a toggle in the toolbar
+- Plugin and built-in skills from Cursor, Claude Code and Codex, with a filter in the toolbar to show your skills, the plugin ones, the built-in ones, or all of them
 - Every copy of a skill on disk, with a warning when two copies have different content
 - The list and the counts update while you work, as skills and chats change on disk
 - A `skillscout` command for your terminal that reads the same data
@@ -86,7 +86,7 @@ Some folders are read by more than one agent. `~/.agents/skills` is a shared fol
 
 Skillscout knows these rules, so for every skill it tells you which agents load it and from which folder.
 
-With the toolbar toggle on, it also shows plugin skills from `~/.cursor/plugins`, `~/.claude/plugins/cache` and `~/.codex/plugins/cache`, plus the built-in skills of Cursor and Codex.
+It lists your own skills first. Pick **Plugin skills**, **Built-in skills** or **All skills** in the toolbar to see the plugin skills from `~/.cursor/plugins`, `~/.claude/plugins/cache` and `~/.codex/plugins/cache`, and the built-in skills of Cursor and Codex.
 
 Skillscout turns on the agents it finds on your Mac. You can turn any of them off in Settings, and Skillscout stops showing its skills and reading its chats.
 

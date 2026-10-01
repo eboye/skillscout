@@ -11,6 +11,19 @@ enum SidebarItem: Hashable {
   var listsSkills: Bool { self != .suggestions && self != .similar }
 }
 
+enum SkillSource: String {
+  case yours, plugin, builtIn, all
+
+  func includes(_ skill: Skill) -> Bool {
+    switch self {
+    case .yours: skill.isPersonal
+    case .plugin: !skill.isPersonal && skill.copies.contains { $0.root.kind == .plugin }
+    case .builtIn: !skill.isPersonal && skill.copies.contains { $0.root.kind == .builtIn }
+    case .all: true
+    }
+  }
+}
+
 struct ContentView: View {
   @Environment(AppStore.self) private var store
   @State private var sidebar: SidebarItem? = .allSkills
@@ -19,7 +32,7 @@ struct ContentView: View {
   @State private var selectedPair: SimilarPair.ID?
   @State private var search = ""
   @FocusState private var isSearchFocused: Bool
-  @AppStorage("showPluginSkills") private var showPluginSkills = false
+  @AppStorage("skillSource") private var source = SkillSource.yours
   @AppStorage("skillSort") private var sort = SkillSort.newest
 
   init(sidebar: SidebarItem = .allSkills, skill: Skill.ID? = nil, suggestion: Suggestion.ID? = nil, pair: SimilarPair.ID? = nil) {
@@ -29,10 +42,12 @@ struct ContentView: View {
     _selectedPair = State(initialValue: pair)
   }
 
-  private var librarySkills: [Skill] {
+  private var enabledSkills: [Skill] {
     let tools = Set(store.tools)
-    return store.skills.filter { (showPluginSkills || $0.isPersonal) && !$0.availableIn.isDisjoint(with: tools) }
+    return store.skills.filter { !$0.availableIn.isDisjoint(with: tools) }
   }
+
+  private var librarySkills: [Skill] { enabledSkills.filter(source.includes) }
 
   private func isMissing(_ skill: Skill) -> Bool {
     skill.isPersonal && !skill.missing(from: store.tools).isEmpty
@@ -55,7 +70,7 @@ struct ContentView: View {
   }
 
   private var listedPairs: [SimilarPair] {
-    let listed = Set(librarySkills.map(\.id))
+    let listed = Set(enabledSkills.map(\.id))
     return store.similar.filter { pair in
       listed.contains(pair.first) && listed.contains(pair.second)
         && (search.isEmpty || pair.first.localizedCaseInsensitiveContains(search) || pair.second.localizedCaseInsensitiveContains(search))
@@ -153,6 +168,18 @@ struct ContentView: View {
       .help("Uninstall the selected skill from every tool, by moving it to the Trash")
     }
     ToolbarItem {
+      Picker("Show", selection: $source) {
+        Text("Your skills").tag(SkillSource.yours)
+        Text("Plugin skills").tag(SkillSource.plugin)
+        Text("Built-in skills").tag(SkillSource.builtIn)
+        Divider()
+        Text("All skills").tag(SkillSource.all)
+      }
+      .pickerStyle(.menu)
+      .disabled(!(sidebar?.listsSkills ?? true))
+      .help("Show your own skills, the ones from plugins, the ones built into the agents, or all of them")
+    }
+    ToolbarItem {
       Picker("Sort", selection: $sort) {
         Text("Newest first").tag(SkillSort.newest)
         Text("Sort by name").tag(SkillSort.name)
@@ -161,12 +188,6 @@ struct ContentView: View {
       .pickerStyle(.menu)
       .disabled(!(sidebar?.listsSkills ?? true))
       .help("Sort skills by when you created them, by name, or by how often they're used")
-    }
-    ToolbarItem {
-      Toggle(isOn: $showPluginSkills) {
-        Label("Plugin and built-in skills", systemImage: "puzzlepiece.extension")
-      }
-      .help("Show plugin and built-in skills too")
     }
     ToolbarItem {
       Button {
