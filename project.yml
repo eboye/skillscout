@@ -6,8 +6,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "1.3.0"
-    CURRENT_PROJECT_VERSION: "4"
+    MARKETING_VERSION: "1.4.0"
+    CURRENT_PROJECT_VERSION: "5"
 targets:
   Skillscout:
     type: application
@@ -28,6 +28,8 @@ targets:
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
+        CODE_SIGN_ENTITLEMENTS: Skillscout/Skillscout.entitlements
+        CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO
   SkillscoutCLI:
     type: tool
     platform: macOS
@@ -50,3 +52,5 @@ targets:
         SKIP_INSTALL: YES
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
+        CODE_SIGN_ENTITLEMENTS: SkillscoutCLI.entitlements
+        CODE_SIGN_INJECT_BASE_ENTITLEMENTS: NO

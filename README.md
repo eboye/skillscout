@@ -12,23 +12,13 @@ Read the announcement and watch the 1-minute demo on my blog: [I built Skillscou
 
 ## Download
 
-Get `Skillscout-1.3.0.zip` from the [latest release](https://github.com/flaviocopes/skillscout/releases/latest), unzip it, and drag Skillscout to your Applications folder. It runs on macOS 15 Sequoia or later, on Apple silicon and Intel Macs.
+Get `Skillscout-1.4.0.zip` from the [latest release](https://github.com/flaviocopes/skillscout/releases/latest), unzip it, and drag Skillscout to your Applications folder. It runs on macOS 15 Sequoia or later, on Apple silicon and Intel Macs.
 
 ### Opening it the first time
 
-Skillscout isn't signed with an Apple Developer ID or notarized by Apple. So the first time you open it, macOS says it "could not verify Skillscout is free of malware". Click **Done**, then allow it in one of two ways.
+Skillscout is signed with my Apple Developer ID and notarized by Apple. The first time you open it, macOS asks if you're sure you want to open an app downloaded from the internet. Click **Open**.
 
-In System Settings, open **Privacy & Security** and scroll down to the message about Skillscout. Click **Open Anyway**, confirm, and open the app again. The button shows up for about an hour after you try to open the app.
-
-In Terminal, remove the quarantine flag macOS adds to downloaded files, then open the app:
-
-```sh
-xattr -dr com.apple.quarantine /Applications/Skillscout.app
-```
-
-The same command fixes a message saying Skillscout is damaged. You don't need to turn off Gatekeeper for either option.
-
-On a work laptop you might not be able to install apps in `/Applications`. You can keep Skillscout in the `Applications` folder inside your home folder, and run the command on `~/Applications/Skillscout.app`. If your company blocks apps that aren't notarized, ask your IT team.
+On a work laptop you might not be able to install apps in `/Applications`. You can keep Skillscout in the `Applications` folder inside your home folder instead.
 
 ### Updates
 
@@ -303,7 +293,13 @@ Open `Skillscout.xcodeproj` and press `⌘R`. To build the release zip from the 
 scripts/build-release.sh
 ```
 
-It builds a universal app in `build/release/Release/Skillscout.app`, checks its signature, and zips it into `dist/`. The app is ad-hoc signed. A copy you build yourself opens without a warning.
+It builds a universal app in `build/release/Release/Skillscout.app` and zips it into `dist/`. With my Developer ID certificate in the keychain it signs and notarizes the app. Everywhere else it signs it ad hoc, so your copy is signed ad hoc. A copy you build yourself opens without a warning on your Mac.
+
+If you send it to another Mac, macOS says it "could not verify Skillscout is free of malware". Click **Done**, then go to **System Settings → Privacy & Security** and click **Open Anyway**, or remove the quarantine flag in Terminal:
+
+```sh
+xattr -dr com.apple.quarantine /Applications/Skillscout.app
+```
 
 The `skillscout` command is its own target, `SkillscoutCLI`, and the app embeds it in `Contents/Helpers`. To build only the command:
 
