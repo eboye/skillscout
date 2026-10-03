@@ -99,7 +99,9 @@ fi
 ditto -x -k "$ZIP" "$CHECK"
 codesign --verify --deep --strict "$CHECK/$NAME.app"
 
-spctl --assess --type execute --verbose "$APP"
+if [ "$SIGNATURE" = "Developer ID" ]; then
+  spctl --assess --type execute --verbose "$APP"
+fi
 
 echo "Built $APP $VERSION for $(lipo -archs "$APP/Contents/MacOS/$NAME"), $SIGNATURE signed"
 echo "$ZIP"
