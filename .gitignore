@@ -9,3 +9,4 @@ xcuserdata/
 .swiftpm/
 /Linux/arch/*
 !/Linux/arch/PKGBUILD
+__pycache__/

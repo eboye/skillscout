@@ -19,7 +19,8 @@ optdepends=(
   'openai-codex: the same AI features through the Codex CLI'
 )
 options=('!lto' '!debug')
-source=("$pkgname::git+file://${startdir%/Linux/arch}")
+_repo="${startdir%/Linux/arch}"
+source=("$pkgname::git+file://$_repo#commit=$(git -C "$_repo" rev-parse HEAD)")
 sha256sums=('SKIP')
 
 build() {

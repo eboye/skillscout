@@ -1,0 +1,43 @@
+# Skillscout as a Flatpak, on the GNOME 50 runtime with the Swift SDK extension:
+#
+#   flatpak-builder --user --install-deps-from=flathub --force-clean --repo=build/flatpak-repo \
+#     build/flatpak Linux/packaging/flatpak/com.flaviocopes.skillscout.yml
+#
+# Skillscout reads and changes the agents' folders across your home folder, so it gets the home
+# folder. It runs the Codex and Claude Code CLIs on the host through flatpak-spawn, which needs
+# org.freedesktop.Flatpak. SwiftPM fetches the dependencies while building, so the build has the
+# network.
+id: com.flaviocopes.skillscout
+runtime: org.gnome.Platform
+runtime-version: '50'
+sdk: org.gnome.Sdk
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.swift6
+command: skillscout-gnome
+finish-args:
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  - --filesystem=home
+  - --talk-name=org.freedesktop.Flatpak
+build-options:
+  append-path: /usr/lib/sdk/swift6/bin
+  prepend-ld-library-path: /usr/lib/sdk/swift6/lib
+modules:
+  - name: skillscout
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+    build-commands:
+      - swift build -c release
+      - STRIP=1 SKIP_BUILD=1 PREFIX=/app Linux/scripts/install.sh
+      - install -Dm644 LICENSE /app/share/licenses/skillscout/LICENSE
+    sources:
+      - type: dir
+        path: ../../..
+        skip:
+          - .build
+          - build
+          - .git

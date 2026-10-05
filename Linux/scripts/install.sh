@@ -5,6 +5,7 @@
 #   Linux/scripts/install.sh                      installs into ~/.local
 #   PREFIX=/usr DESTDIR="$pkgdir" install.sh      what the PKGBUILD runs
 #   SKIP_BUILD=1 install.sh                       installs the last release build
+#   STRIP=1 install.sh                            strips the binaries and the Swift runtime
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -39,6 +40,11 @@ if command -v patchelf >/dev/null; then
   for library in "$runtime"/*.so*; do
     patchelf --set-rpath '$ORIGIN' "$library"
   done
+fi
+
+# Packages that don't strip on their own, like the .deb and .rpm, ask for it.
+if [ -n "${STRIP:-}" ]; then
+  strip --strip-unneeded "$dest/bin/skillscout" "$dest/bin/skillscout-gnome" "$runtime"/*.so*
 fi
 
 install -Dm644 Linux/com.flaviocopes.skillscout.desktop "$dest/share/applications/com.flaviocopes.skillscout.desktop"

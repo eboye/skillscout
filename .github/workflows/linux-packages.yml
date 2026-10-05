@@ -1,0 +1,134 @@
+name: Linux packages
+
+# Builds the Linux packages: .deb, .rpm, Arch, Flatpak, AppImage and a tarball. On a tag, it puts
+# them on the tag's GitHub release. Tags follow upstream's version, MARKETING_VERSION in
+# project.yml: v1.4.0, or v1.4.0-linux.2 for a second Linux build of the same version.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: version
+        run: |
+          read -r version release < <(Linux/packaging/version.sh ${{ github.ref_type == 'tag' && github.ref_name || '' }})
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+
+  deb:
+    needs: version
+    runs-on: ubuntu-latest
+    container: ubuntu:26.04
+    timeout-minutes: 40
+    env:
+      RELEASE: ${{ needs.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@v6
+      - run: Linux/packaging/deps-ubuntu.sh
+      - run: Linux/packaging/install-swift.sh ubuntu26.04
+      - run: Linux/packaging/package.sh deb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: build/packages/*
+
+  # Fedora 44: glib 2.88, which Adwaita for Swift needs, and glibc 2.43, as old as any distribution
+  # with both, so the AppImage and the tarball built here run on the most systems.
+  fedora:
+    needs: version
+    runs-on: ubuntu-latest
+    container: fedora:44
+    timeout-minutes: 40
+    env:
+      RELEASE: ${{ needs.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@v6
+      - run: Linux/packaging/deps-fedora.sh
+      - run: Linux/packaging/install-swift.sh fedora41
+      - run: Linux/packaging/package.sh rpm tarball appimage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fedora
+          path: build/packages/*
+
+  arch:
+    needs: version
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    timeout-minutes: 40
+    steps:
+      - run: pacman -Syu --noconfirm --needed base-devel git gtk4 libadwaita sqlite ncurses libxml2 libedit pkgconf patchelf
+      - uses: actions/checkout@v6
+      - run: Linux/packaging/install-swift.sh ubuntu24.04
+      # makepkg won't run as root, and builds from the checked-out commit.
+      - run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          sed -i "s/^pkgrel=.*/pkgrel=${{ needs.version.outputs.release }}/" Linux/arch/PKGBUILD
+          useradd -m builder
+          chown -R builder "$GITHUB_WORKSPACE"
+          su builder -c "git config --global --add safe.directory '*' && cd Linux/arch && PATH='$PATH' makepkg --nodeps --noconfirm"
+          mkdir -p build/packages
+          mv Linux/arch/*.pkg.tar.zst build/packages/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arch
+          path: build/packages/*
+
+  flatpak:
+    needs: version
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:gnome-50
+      options: --privileged
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v6
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: skillscout-${{ needs.version.outputs.version }}.flatpak
+          manifest-path: Linux/packaging/flatpak/com.flaviocopes.skillscout.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak
+          path: skillscout-${{ needs.version.outputs.version }}.flatpak
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: [version, deb, fedora, arch, flatpak]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+      VERSION: ${{ needs.version.outputs.version }}
+      RELEASE: ${{ needs.version.outputs.release }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          path: packages
+          merge-multiple: true
+      - run: |
+          cd packages
+          sha256sum -- * > SHA256SUMS
+          cat SHA256SUMS
+      - run: |
+          sed "s/@VERSION@/$VERSION/g; s/@RELEASE@/$RELEASE/g" Linux/packaging/release-notes.md > notes.md
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" packages/* --clobber
+          else
+            gh release create "$TAG" packages/* --title "Skillscout $VERSION for Linux" --notes-file notes.md
+          fi

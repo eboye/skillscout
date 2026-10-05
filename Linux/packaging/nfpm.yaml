@@ -1,0 +1,44 @@
+# The .deb and .rpm, built by Linux/packaging/package.sh from the tree install.sh stages in
+# build/stage. nfpm fills in the ${…} values from the environment.
+name: skillscout
+version: ${VERSION}
+release: ${RELEASE}
+arch: ${ARCH}
+platform: linux
+section: devel
+priority: optional
+maintainer: Vasilj Milošević <624357+eboye@users.noreply.github.com>
+vendor: Flavio Copes
+homepage: https://github.com/flaviocopes/skillscout
+license: MIT
+description: |
+  Find the skills your coding agents load, see which agents can use each one,
+  and count how often you use them. A GNOME app and the skillscout command, for
+  Cursor, Claude Code, Codex, Gemini CLI, OpenCode, Droid, Pi and Amp.
+
+contents:
+  - src: ./build/stage/usr/
+    dst: /usr/
+    type: tree
+  - src: ./LICENSE
+    dst: /usr/share/licenses/skillscout/LICENSE
+
+overrides:
+  deb:
+    depends:
+      - libgtk-4-1
+      - libadwaita-1-0 (>= 1.8)
+      - libsqlite3-0
+      - libstdc++6
+    recommends:
+      - gvfs
+  rpm:
+    depends:
+      - gtk4
+      - libadwaita >= 1.8
+      - sqlite-libs
+      - libstdc++
+
+rpm:
+  group: Development/Tools
+  summary: See the skills your coding agents load

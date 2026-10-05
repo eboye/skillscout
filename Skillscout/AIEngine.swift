@@ -88,6 +88,9 @@ struct AIEngine: Sendable {
     case .claude:
       process.arguments = ["-p", "--no-session-persistence", "--tools", "", "--model", model]
     }
+    #if os(Linux)
+    Flatpak.runOnHost(process)
+    #endif
 
     let status: Int32 = try await withCheckedThrowingContinuation { continuation in
       process.terminationHandler = { continuation.resume(returning: $0.terminationStatus) }
@@ -139,6 +142,9 @@ actor ShellEnvironment {
     process.standardOutput = pipe
     process.standardError = FileHandle.nullDevice
     process.standardInput = FileHandle.nullDevice
+    #if os(Linux)
+    Flatpak.runOnHost(process)
+    #endif
     guard (try? process.run()) != nil else { return nil }
 
     let data = pipe.fileHandleForReading.readDataToEndOfFile()
@@ -150,7 +156,10 @@ actor ShellEnvironment {
   }
 
   static func find(_ name: String, in path: String) -> URL? {
-    path.split(separator: ":")
+    #if os(Linux)
+    if Flatpak.isSandboxed { return Flatpak.find(name, in: path) }
+    #endif
+    return path.split(separator: ":")
       .map { URL(fileURLWithPath: String($0)).appending(path: name) }
       .first { FileManager.default.isExecutableFile(atPath: $0.path) }
   }

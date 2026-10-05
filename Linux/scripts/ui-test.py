@@ -9,6 +9,7 @@ headless mutter for it.
 """
 import json
 import os
+import shlex
 import subprocess
 import sys
 import time
@@ -21,7 +22,9 @@ from gi.repository import Atspi  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 HOME = ROOT / "build/demo-home"
-APP = ROOT / ".build/debug/skillscout-gnome"
+# SKILLSCOUT_APP runs another build of the app, like the Flatpak, as a shell-quoted command.
+STATE = Path(os.environ.get("SKILLSCOUT_STATE", str(HOME / ".local/share/skillscout/state.json")))
+APP = shlex.split(os.environ.get("SKILLSCOUT_APP", str(ROOT / ".build/debug/skillscout-gnome")))
 results: list[tuple[str, bool, str]] = []
 
 
@@ -64,11 +67,46 @@ def walk(node, depth=0):
             yield from walk(child, depth + 1)
 
 
-def app_root():
+LAUNCHED: set[int] = set()
+
+
+def descendants(pid: int) -> set[int]:
+    """The process and every process it started, so a wrapper like the Flatpak's still counts."""
+    found, queue = {pid}, [pid]
+    while queue:
+        parent = queue.pop()
+        for child in Path("/proc").glob("[0-9]*"):
+            try:
+                if int((child / "stat").read_text().rsplit(")", 1)[1].split()[1]) == parent and int(child.name) not in found:
+                    found.add(int(child.name))
+                    queue.append(int(child.name))
+            except (OSError, ValueError, IndexError):
+                continue
+    return found
+
+
+NAMES = ("skillscout-gnome", "Skillscout", "com.flaviocopes.skillscout")
+ALREADY_OPEN: set[int] = set()
+
+
+def skillscout_apps():
     desktop = Atspi.get_desktop(0)
     for index in range(desktop.get_child_count()):
         child = desktop.get_child_at_index(index)
-        if child is not None and child.get_name() in ("skillscout-gnome", "Skillscout", "com.flaviocopes.skillscout"):
+        try:
+            if child is not None and child.get_name() in NAMES:
+                yield child, child.get_process_id()
+        except Exception:
+            continue
+
+
+def app_root():
+    """The app this test started, never a Skillscout you have open with your real skills: one
+    whose process this test launched, or, for a Flatpak, whose accessibility proxy reports another
+    process, one that wasn't on the bus before the test."""
+    ours = descendants(next(iter(LAUNCHED))) if LAUNCHED else set()
+    for child, pid in skillscout_apps():
+        if pid in ours or (LAUNCHED and pid not in ALREADY_OPEN):
             return child
     return None
 
@@ -147,9 +185,17 @@ def trash() -> list[str]:
 
 
 def main() -> int:
-    env = {k: v for k, v in os.environ.items() if k not in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "DISPLAY")}
-    env.update(HOME=str(HOME), SHELL="/bin/bash")
-    app = subprocess.Popen([str(APP)], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    if "SKILLSCOUT_APP" in os.environ:
+        # A launcher like flatpak run needs the real home to find its installation, so the command
+        # passes HOME, SHELL and SKILLSCOUT_TEST into the app itself, with --env.
+        env = dict(os.environ)
+    else:
+        env = {k: v for k, v in os.environ.items() if k not in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "DISPLAY")}
+        # SKILLSCOUT_TEST keeps this run from handing over to a Skillscout that's already open.
+        env.update(HOME=str(HOME), SHELL="/bin/bash", SKILLSCOUT_TEST="1")
+    ALREADY_OPEN.update(pid for _, pid in skillscout_apps())
+    app = subprocess.Popen(APP, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    LAUNCHED.add(app.pid)
     try:
         check("app shows up on the accessibility bus", wait(lambda: find(Atspi.Role.LABEL, name="release-notes"), 20) is not None)
 
@@ -243,7 +289,7 @@ def main() -> int:
         # Dismiss an idea
         check("select the saved idea from before", select_row("Check links before deploying"))
         check("click Dismiss This Idea", click("Dismiss This Idea"))
-        state = json.loads((HOME / ".local/share/skillscout/state.json").read_text())
+        state = json.loads(STATE.read_text())
         check("dismissing remembers the idea", "link-check" in state.get("dismissed", []), str(state.get("dismissed")))
 
         # Search

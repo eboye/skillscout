@@ -13,6 +13,7 @@ enum CommandLineTool {
 
   /// What happened, for the alert.
   static func install() -> String {
+    if Flatpak.isSandboxed { return installFlatpakWrapper() }
     guard let bundled else {
       return "Couldn't find the skillscout command next to the app. Build it with swift build, or install the package, which puts it in /usr/bin."
     }
@@ -24,8 +25,7 @@ enum CommandLineTool {
     let fm = FileManager.default
     do {
       try fm.createDirectory(at: link.deletingLastPathComponent(), withIntermediateDirectories: true)
-      if let existing = try? fm.destinationOfSymbolicLink(atPath: link.path) {
-        _ = existing
+      if (try? fm.destinationOfSymbolicLink(atPath: link.path)) != nil {
         try fm.removeItem(at: link)
       } else if fm.fileExists(atPath: link.path) {
         return "\(Paths.abbreviate(link)) already exists and isn't a link, so Skillscout left it alone."
@@ -34,6 +34,32 @@ enum CommandLineTool {
     } catch {
       return "Couldn't install the command: \(error.localizedDescription)"
     }
+    return installed()
+  }
+
+  /// A link would point inside the sandbox, so the Flatpak writes a script that runs the command
+  /// through flatpak run instead.
+  private static func installFlatpakWrapper() -> String {
+    let fm = FileManager.default
+    let id = ProcessInfo.processInfo.environment["FLATPAK_ID"] ?? "com.flaviocopes.skillscout"
+    let script = "#!/bin/sh\n# Runs the skillscout command from the Skillscout Flatpak.\nexec flatpak run --command=skillscout \(id) \"$@\"\n"
+    if fm.fileExists(atPath: link.path) || (try? fm.destinationOfSymbolicLink(atPath: link.path)) != nil {
+      let current = (try? String(contentsOf: link, encoding: .utf8)) ?? ""
+      guard current.contains("flatpak run --command=skillscout") else {
+        return "\(Paths.abbreviate(link)) already exists, so Skillscout left it alone."
+      }
+    }
+    do {
+      try fm.createDirectory(at: link.deletingLastPathComponent(), withIntermediateDirectories: true)
+      try script.write(to: link, atomically: true, encoding: .utf8)
+      try fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: link.path)
+    } catch {
+      return "Couldn't install the command: \(error.localizedDescription)"
+    }
+    return installed()
+  }
+
+  private static func installed() -> String {
     let onPath = (ProcessInfo.processInfo.environment["PATH"] ?? "").split(separator: ":").contains { $0 == link.deletingLastPathComponent().path }
     return "Installed skillscout in \(Paths.abbreviate(link.deletingLastPathComponent()))."
       + (onPath ? " Open a new terminal and run skillscout." : " Add ~/.local/bin to your PATH to run it.")

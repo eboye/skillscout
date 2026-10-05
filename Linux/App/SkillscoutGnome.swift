@@ -8,6 +8,7 @@ enum Launcher {
     // UserDefaults names its file after the process on Linux, so this gives the app the Mac app's
     // settings domain, ~/.config/com.flaviocopes.skillscout.plist, which the command reads too.
     ProcessInfo.processInfo.processName = "com.flaviocopes.skillscout"
+    _ = Flatpak.isSandboxed  // Inside a Flatpak, moves the temporary folder where host CLIs can see it.
     MainQueue.attachToGLib()
     SkillscoutGnome.main()
   }
@@ -21,6 +22,13 @@ struct SkillscoutGnome: App {
 
   init() {
     renderer = Renderer(store: store, model: model)
+    // GApplication hands a second launch over to the copy that's already open. A test or a
+    // screenshot runs against a made-up home, so it must never reach the Skillscout you have open.
+    let environment = ProcessInfo.processInfo.environment
+    if environment["SKILLSCOUT_TEST"] != nil || environment["SKILLSCOUT_SCREENSHOT"] != nil {
+      let flags = g_application_get_flags(app.pointer?.cast()).rawValue | GApplicationFlags.APPLICATION_NON_UNIQUE.rawValue
+      g_application_set_flags(app.pointer?.cast(), GApplicationFlags(rawValue: flags))
+    }
     gtk_window_set_default_icon_name("com.flaviocopes.skillscout")
   }
 

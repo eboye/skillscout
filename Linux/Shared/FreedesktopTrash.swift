@@ -22,7 +22,13 @@ enum FreedesktopTrash {
   /// The home Trash, under `$XDG_DATA_HOME`, or `~/.local/share` of `Paths.home`, so a made-up home
   /// gets its own Trash.
   static var homeTrash: URL {
-    if let data = ProcessInfo.processInfo.environment["XDG_DATA_HOME"], data.hasPrefix("/") {
+    // A Flatpak's XDG_DATA_HOME is its own folder in ~/.var/app, so it uses the host's instead, as
+    // long as that's in the same home: a made-up home gets its own Trash.
+    let environment = ProcessInfo.processInfo.environment
+    let data = Flatpak.isSandboxed
+      ? environment["HOST_XDG_DATA_HOME"].flatMap { $0.hasPrefix(Paths.home.path + "/") ? $0 : nil }
+      : environment["XDG_DATA_HOME"]
+    if let data, data.hasPrefix("/") {
       return URL(fileURLWithPath: data, isDirectory: true).appending(path: "Trash")
     }
     return Paths.at(".local/share/Trash")
