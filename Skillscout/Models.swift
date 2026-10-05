@@ -1,4 +1,8 @@
+#if canImport(CryptoKit)
 import CryptoKit
+#else
+import Crypto
+#endif
 import Foundation
 
 enum Paths {
@@ -19,7 +23,12 @@ enum Paths {
   }
 
   static let appSupport: URL = {
+    #if os(Linux)
+    let data = ProcessInfo.processInfo.environment["XDG_DATA_HOME"].flatMap { $0.hasPrefix("/") ? URL(fileURLWithPath: $0) : nil }
+    let url = (data ?? at(".local/share")).appending(path: "skillscout")
+    #else
     let url = at("Library/Application Support/Skillscout")
+    #endif
     try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
     return url
   }()

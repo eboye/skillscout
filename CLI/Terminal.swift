@@ -6,7 +6,7 @@ enum Terminal {
 
   static var width: Int {
     var size = winsize()
-    if ioctl(STDOUT_FILENO, TIOCGWINSZ, &size) == 0, size.ws_col > 0 { return Int(size.ws_col) }
+    if ioctl(STDOUT_FILENO, UInt(TIOCGWINSZ), &size) == 0, size.ws_col > 0 { return Int(size.ws_col) }
     return Int(ProcessInfo.processInfo.environment["COLUMNS"] ?? "") ?? 100
   }
 
@@ -64,9 +64,14 @@ enum Terminal {
   }
 
   static func ago(_ date: Date) -> String {
+    #if os(Linux)
+    // Linux's Foundation has no RelativeDateTimeFormatter.
+    return date.formatted(.relative(presentation: .numeric, unitsStyle: .wide))
+    #else
     let formatter = RelativeDateTimeFormatter()
     formatter.unitsStyle = .full
     return formatter.localizedString(for: date, relativeTo: .now)
+    #endif
   }
 
   static func list(_ items: [String]) -> String {

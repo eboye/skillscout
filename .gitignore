@@ -5,3 +5,5 @@ DerivedData/
 xcuserdata/
 .cursor/hooks/state/
 /skillscout-showreel.mp4
+.build/
+.swiftpm/

@@ -1,5 +1,9 @@
 import Foundation
+#if canImport(SQLite3)
 import SQLite3
+#else
+import CSQLite
+#endif
 
 /// Parsers for Gemini CLI, Droid, Pi, Amp and OpenCode chats.
 extension PromptLibrary {

@@ -1,0 +1,1 @@
+../Shared/FreedesktopTrash.swift
