@@ -1,4 +1,4 @@
-# Builds Skillscout for Arch Linux from this checkout's committed linux-port branch:
+# Builds Skillscout for Arch Linux from the commit this checkout has checked out:
 #
 #   cd Linux/arch && makepkg -si
 #
@@ -19,7 +19,7 @@ optdepends=(
   'openai-codex: the same AI features through the Codex CLI'
 )
 options=('!lto' '!debug')
-source=("$pkgname::git+file://${startdir%/Linux/arch}#branch=linux-port")
+source=("$pkgname::git+file://${startdir%/Linux/arch}")
 sha256sums=('SKIP')
 
 build() {
