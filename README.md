@@ -294,7 +294,20 @@ Skillscout also runs on Linux, as a GNOME app and the same `skillscout` command.
   <img src="docs/screenshot-linux-light.png" alt="The Skillscout GNOME app with the code-review skill selected" />
 </picture>
 
-You need Swift 6.3 or later, GTK 4 and libadwaita 1.8 or later, which means GNOME 49 or a distribution as recent, and SQLite.
+Each release has packages for Linux:
+
+| Package | For |
+| --- | --- |
+| `.deb` | Ubuntu 26.04 and later, Debian testing |
+| `.rpm` | Fedora 44 and later |
+| `.pkg.tar.zst` | Arch Linux and derivatives |
+| `.flatpak` | Any distribution with Flatpak |
+| `.AppImage` | Any distribution with glibc 2.43 or later |
+| `.tar.gz` | Anything else with libadwaita 1.8, to unpack into `~/.local` |
+
+The Flatpak and the AppImage bring GTK 4 and libadwaita with them. The others need libadwaita 1.8 or later, which means GNOME 49 or a distribution as recent. The Flatpak has your home folder, since the agents keep their skills there, and runs the Codex and Claude Code CLIs outside the sandbox through `flatpak-spawn`.
+
+To build from source, you need Swift 6.3 or later, GTK 4, libadwaita 1.8 or later with glib 2.88, and SQLite.
 
 On Arch Linux, build and install the package:
 
@@ -320,7 +333,9 @@ What's different from the Mac app:
 - Settings live in `~/.config/com.flaviocopes.skillscout.plist`, which the command reads too.
 - There's no update check. Update with your package, or run the install again.
 
-For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, and `Linux/scripts/screenshot.sh` takes screenshots. Both run on a headless GNOME display, so nothing opens on your desktop.
+For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, `Linux/scripts/ui-test-flatpak.sh` does the same inside the Flatpak, and `Linux/scripts/screenshot.sh` takes screenshots. They run on a headless GNOME display, so nothing opens on your desktop, and they never touch a Skillscout you have open.
+
+`Linux/packaging/package.sh deb rpm tarball appimage` builds packages into `build/packages`, and `Linux/packaging/flatpak/com.flaviocopes.skillscout.yml` is the Flatpak manifest. The `Linux packages` workflow builds them all, each on the distribution it's for, and attaches them to the release when you push a tag. Linux releases follow the Mac version, `MARKETING_VERSION` in `project.yml`: tag `v1.4.0`, or `v1.4.0-linux.2` for a second Linux build of the same version.
 
 ## Build it from source
 
