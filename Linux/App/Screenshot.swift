@@ -36,11 +36,33 @@ enum Screenshot {
       select(environment["SKILLSCOUT_SIDEBAR"] ?? "all", environment["SKILLSCOUT_SELECT"], store: store, model: model)
       try? await Task.sleep(for: .milliseconds(1500))
 
+      if openMenu, let button = menuButton(in: window.pointer?.cast()) {
+        gtk_menu_button_popup(OpaquePointer(button))
+        try? await Task.sleep(for: .milliseconds(500))
+        // A popover is a surface of its own, so it gets its own picture.
+        if let popover = gtk_menu_button_get_popover(OpaquePointer(button)) {
+          _ = save(UnsafeMutablePointer(OpaquePointer(popover)), to: path.replacingOccurrences(of: ".png", with: "-popover.png"))
+        }
+      }
       saveAfterPaint(window: window, to: path) { app.quit() }
     }
   }
 
   @MainActor private static var afterPaint: SignalData?
+  @MainActor private static var openMenu = false
+
+  /// The first menu button in the window, which is the main menu in the sidebar's header bar.
+  @MainActor
+  private static func menuButton(in widget: UnsafeMutablePointer<GtkWidget>?) -> UnsafeMutablePointer<GtkWidget>? {
+    guard let widget else { return nil }
+    if String(cString: gtk_widget_get_css_name(widget)) == "menubutton" { return widget }
+    var child = gtk_widget_get_first_child(widget)
+    while let current = child {
+      if let found = menuButton(in: current) { return found }
+      child = gtk_widget_get_next_sibling(current)
+    }
+    return nil
+  }
 
   /// A widget only has something to draw right after GTK paints it, so this waits for a frame.
   @MainActor
@@ -89,6 +111,7 @@ enum Screenshot {
     case "uninstall": store.removal = skill.map(Removal.uninstall)
     case "preferences": model.showPreferences = true
     case "about": model.showAbout = true
+    case "menu": openMenu = true
     default: break
     }
   }

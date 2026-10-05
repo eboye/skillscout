@@ -21,7 +21,13 @@ enum SkillScanner {
         let meta = Frontmatter.parse(text)
         let name = meta["name"].flatMap { $0.isEmpty ? nil : $0 } ?? folder.lastPathComponent
         let isSymlink = (try? folder.resourceValues(forKeys: [.isSymbolicLinkKey]))?.isSymbolicLink ?? false
+        #if os(Linux)
+        // Linux's Foundation drops the trailing slash when it resolves a link, and URLs that differ
+        // only in that slash aren't equal, so a link and its folder wouldn't match up.
+        let resolved = URL(fileURLWithPath: folder.resolvingSymlinksInPath().path, isDirectory: true)
+        #else
         let resolved = folder.resolvingSymlinksInPath()
+        #endif
         let copy = SkillCopy(
           folder: folder,
           resolved: resolved,

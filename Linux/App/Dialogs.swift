@@ -225,6 +225,8 @@ struct RenameView: View {
 
   private func rename() {
     guard name != skill.name, problem == nil else { return }
+    // Closing the dialog clears renameText, so take the name first.
+    let (skill, name) = (skill, name)
     store.renaming = nil
     Task { await store.rename(skill, to: name) }
   }
@@ -278,9 +280,10 @@ struct EditView: View {
 
   private func save() {
     guard let edit = model.edit, isChanged, problem == nil else { return }
+    let (text, overwrite) = (model.editText, model.editChangedOnDisk)
     Task {
       do {
-        try await store.save(edit, text: model.editText, overwrite: model.editChangedOnDisk)
+        try await store.save(edit, text: text, overwrite: overwrite)
         store.editing = nil
       } catch SkillInstaller.Failure.changedOnDisk {
         model.editChangedOnDisk = true
