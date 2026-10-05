@@ -24,7 +24,11 @@ sha256sums=('SKIP')
 
 build() {
   cd "$pkgname"
-  swift build -c release
+  # Keeps the build folder out of the source paths Swift writes into the binaries.
+  swift build -c release \
+    -Xswiftc -file-prefix-map -Xswiftc "$srcdir=/usr/src/$pkgname" \
+    -Xcc -ffile-prefix-map="$srcdir=/usr/src/$pkgname" \
+    -Xcxx -ffile-prefix-map="$srcdir=/usr/src/$pkgname"
 }
 
 package() {

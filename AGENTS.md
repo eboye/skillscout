@@ -1,6 +1,6 @@
 # Skillscout
 
-A SwiftUI macOS app, plus a `skillscout` command-line tool, that lists the skills of 8 coding agents, counts their use from local chats, and asks AI for new skill ideas. No dependencies, no tests yet.
+A SwiftUI macOS app, plus a `skillscout` command-line tool, that lists the skills of 8 coding agents, counts their use from local chats, and asks AI for new skill ideas. No dependencies on the Mac. A GNOME app and the same command build for Linux from `Package.swift`, see [Linux](#linux) below.
 
 The app and the command share these core files, which only import Foundation, CryptoKit and SQLite3:
 
@@ -57,3 +57,20 @@ swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark
 - The updater trusts the GitHub release. Every release needs its `vX.Y.Z` tag, the zip from `scripts/build-release.sh` attached, and a `MARKETING_VERSION` that matches the tag, or the app refuses the update. The update dialog shows the release notes above `## Install`, so the new features go first.
 - The 1-minute demo video comes from the separate Remotion project `~/dev/skillscout-showreel`. It's not part of this repo.
 - The launch post is `src/posts/skillscout.md` in `~/www/flaviocopes.com`, live at flaviocopes.com/skillscout. A release with new features also updates that post and the site's changelog, following that repo's `AGENTS.md`. The post's banner and screenshot in `public/images/skillscout` are `docs/banner.png` and `docs/screenshot-light.png`, resized to 2000px wide with the site's `sharp` as palette PNGs.
+
+## Linux
+
+`Package.swift` builds the `skillscout` command and the GNOME app, `skillscout-gnome`, with Swift 6.3 or later, GTK 4 and libadwaita 1.8 or later. The Xcode project doesn't use it, and the Mac build stays as it is.
+
+- `Linux/CLI` and `Linux/App/Core` hold symbolic links to the shared files in `CLI/` and `Skillscout/`, so each target compiles them into its own module, like the Xcode targets. A new core file needs a link in both folders, and a new file the app needs, like `AppStore.swift`, in `Linux/App/Core`.
+- The shared files compile on Linux with small `#if os(Linux)` or `canImport` branches: swift-crypto for CryptoKit, the `CSQLite` module for SQLite3, `~/.local/share/skillscout` for the app's data, a relative date without `RelativeDateTimeFormatter`, and resolved folders with the same trailing slash. Keep Linux changes to the shared files behind those branches.
+- `Linux/Shared/FreedesktopTrash.swift`: `FileManager.trashItem` for Linux, following the freedesktop.org Trash spec, so GNOME Files and Dolphin can restore what Skillscout removes.
+- `Linux/App`: the app, with Adwaita for Swift, pinned to a commit in `Package.swift`. `ContentView.swift`, `SkillViews.swift`, `SuggestionViews.swift`, `SimilarViews.swift`, `Dialogs.swift` (the alerts, the rename and edit dialogs, Preferences, About) and `Components.swift` follow the SwiftUI files of the same names, so change both. `Logic.swift` copies the parts of those SwiftUI files that don't draw anything, like `Removal` and `SkillSource`, so keep them in step.
+- `Linux/App/WindowModel.swift`: what the window shows, and the `Renderer`, which re-renders when the store or the window model changes. Adwaita for Swift only follows its own `@State`, so the renderer reads every property the views use. A new `AppStore` property the views read goes in `Renderer.read`.
+- `Linux/App/MainQueue.swift` drains Dispatch's main queue from the GLib main loop. Without it, main-actor tasks never run under GTK.
+- `Linux/App/FileWatcher+Linux.swift`: inotify in place of FSEvents, one watch per folder, skipping hidden folders and dependencies.
+- Adwaita for Swift dialogs that share a parent need their own `id`, or one closes the other. Never observe a `Signal`, since reading it resets it and renders again, forever.
+- Edit `SKILL.md` text with `plainTextEditor` in `Components.swift`, a monospaced `GtkTextView`. GTK makes no smart quotes or dashes.
+- `Linux/scripts/ui-test.sh` clicks through the app over AT-SPI against the made-up home from `Linux/scripts/demo-home.sh`, on a headless mutter, and checks the files each action changes. The AI features go through `Linux/scripts/fake-codex.sh`, so nothing leaves the machine and no login is needed. Run it after changing the app. `Linux/scripts/screenshot.sh` writes light and dark screenshots to `build/shots`, through `SKILLSCOUT_SCREENSHOT` in `Linux/App/Screenshot.swift`. Never point either at the real home.
+- `Linux/scripts/install.sh` installs into `~/.local`, or `PREFIX` and `DESTDIR`, with the Swift runtime in `lib/skillscout`, so the binaries run without a toolchain. `Linux/arch/PKGBUILD` runs it from the committed `linux-port` branch. `Linux/scripts/render-icon.sh` renders `Linux/icons` from the Icon Composer layers.
+- A release also bumps `pkgver` in the PKGBUILD, the release in `Linux/com.flaviocopes.skillscout.metainfo.xml`, and `appVersion` in `Linux/App/Dialogs.swift`. There's no updater on Linux.

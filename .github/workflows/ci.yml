@@ -15,3 +15,28 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: scripts/build-release.sh
+
+  # The GNOME app needs libadwaita 1.8 or later, so it builds on Arch, with the Ubuntu 24.04 Swift
+  # toolchain and links for the libraries Arch names differently.
+  linux:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    timeout-minutes: 30
+    env:
+      SWIFT: swift-6.4.0-RELEASE-ubuntu24.04
+    steps:
+      - run: pacman -Syu --noconfirm --needed git gtk4 libadwaita sqlite ncurses libxml2 libedit gcc patchelf
+      - uses: actions/checkout@v6
+      - name: Install Swift
+        run: |
+          curl -sSfL "https://download.swift.org/swift-6.4.0-release/ubuntu2404/swift-6.4.0-RELEASE/$SWIFT.tar.gz" | tar xz -C /opt
+          lib="/opt/$SWIFT/usr/lib/swift/linux"
+          ln -sf /usr/lib/libncursesw.so.6 "$lib/libncurses.so.6"
+          ln -sf /usr/lib/libpanelw.so.6 "$lib/libpanel.so.6"
+          ln -sf /usr/lib/libformw.so.6 "$lib/libform.so.6"
+          ln -sf /usr/lib/libxml2.so.16 "$lib/libxml2.so.2"
+          ln -sf /usr/lib/libedit.so.0 "$lib/libedit.so.2"
+          echo "/opt/$SWIFT/usr/bin" >> "$GITHUB_PATH"
+      - run: swift build -c release
+      - run: .build/release/skillscout help
+      - run: PREFIX=/usr DESTDIR="$PWD/build/stage" SKIP_BUILD=1 Linux/scripts/install.sh

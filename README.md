@@ -283,6 +283,45 @@ Skillscout runs Codex with `--ephemeral` in a read-only sandbox, and Claude Code
 
 Skillscout keeps its own data in `~/Library/Application Support/Skillscout`. There's a cache of the chats it parsed, and the explanations, ideas and drafts it saved. It also remembers the old names of the skills you renamed or merged, so their chats keep counting.
 
+On Linux, that data lives in `~/.local/share/skillscout`, and the app makes no requests of its own: there's no update check.
+
+## Linux
+
+Skillscout also runs on Linux, as a GNOME app and the same `skillscout` command. The app is built with [Adwaita for Swift](https://codeberg.org/aparoksha/adwaita-swift), on the same core as the Mac app, so it finds the same skills, reads the same chats, and makes the same changes. The agents keep their folders in the same places on Linux.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-linux-dark.png" />
+  <img src="docs/screenshot-linux-light.png" alt="The Skillscout GNOME app with the code-review skill selected" />
+</picture>
+
+You need Swift 6.3 or later, GTK 4 and libadwaita 1.8 or later, which means GNOME 49 or a distribution as recent, and SQLite.
+
+On Arch Linux, build and install the package:
+
+```sh
+cd Linux/arch
+makepkg -si
+```
+
+It takes Swift from the AUR's `swift-bin`. With a toolchain from [swift.org](https://www.swift.org/install/linux/) on your `PATH` instead, run `makepkg -si --nodeps`.
+
+On other distributions, install your distribution's GTK 4, libadwaita and SQLite development packages, and run:
+
+```sh
+Linux/scripts/install.sh
+```
+
+It installs the app and the command into `~/.local`, with the Swift runtime they need in `~/.local/lib/skillscout`, so they run without a Swift toolchain. Skillscout shows up in your app grid. `PREFIX=/usr` installs it for every user.
+
+What's different from the Mac app:
+
+- Removed skills go to the Trash that GNOME Files and KDE's Dolphin show, so **Restore** puts them back.
+- **Install Command Line Tool** in the main menu links `skillscout` into `~/.local/bin`, without a password. The package puts it in `/usr/bin`.
+- Settings live in `~/.config/com.flaviocopes.skillscout.plist`, which the command reads too.
+- There's no update check. Update with your package, or run the install again.
+
+For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, and `Linux/scripts/screenshot.sh` takes screenshots. Both run on a headless GNOME display, so nothing opens on your desktop.
+
 ## Build it from source
 
 You need macOS 15 or later and Xcode 26. The app icon is an Icon Composer file, and older Xcode versions can't build it.
