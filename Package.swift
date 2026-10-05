@@ -17,9 +17,13 @@ let core: [Target.Dependency] = [
   .product(name: "Crypto", package: "swift-crypto", condition: .when(platforms: [.linux])),
 ]
 
+/// Installed, the binaries find the Swift runtime that Linux/scripts/install.sh copies next to them,
+/// in lib/skillscout, so they run without a Swift toolchain.
+let standalone: [LinkerSetting] = [.unsafeFlags(["-Xlinker", "-rpath=$ORIGIN/../lib/skillscout"], .when(platforms: [.linux]))]
+
 var targets: [Target] = [
   .systemLibrary(name: "CSQLite", path: "Linux/CSQLite", pkgConfig: "sqlite3", providers: [.apt(["libsqlite3-dev"])]),
-  .executableTarget(name: "skillscout", dependencies: core, path: "Linux/CLI"),
+  .executableTarget(name: "skillscout", dependencies: core, path: "Linux/CLI", linkerSettings: standalone),
 ]
 
 var products: [Product] = [
@@ -33,7 +37,7 @@ targets.append(
     name: "SkillscoutLinux",
     dependencies: core + [.product(name: "Adwaita", package: "adwaita-swift")],
     path: "Linux/App",
-    resources: [.copy("Resources")]
+    linkerSettings: standalone
   )
 )
 products.append(.executable(name: "skillscout-gnome", targets: ["SkillscoutLinux"]))

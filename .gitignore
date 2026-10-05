@@ -7,3 +7,5 @@ xcuserdata/
 /skillscout-showreel.mp4
 .build/
 .swiftpm/
+/Linux/arch/*
+!/Linux/arch/PKGBUILD

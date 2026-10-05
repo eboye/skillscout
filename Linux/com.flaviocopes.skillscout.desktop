@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Skillscout
+GenericName=Agent Skills
+Comment=Find the skills your coding agents load, see which agents can use each one, and count how often you use them
+Exec=skillscout-gnome
+Icon=com.flaviocopes.skillscout
+Terminal=false
+Categories=Development;GTK;
+Keywords=skills;agents;claude;codex;cursor;gemini;opencode;AI;
+StartupNotify=true
