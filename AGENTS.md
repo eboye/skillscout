@@ -1,4 +1,4 @@
-# Skillscout
+# Skill Cabinet
 
 A SwiftUI macOS app, plus a `skillscout` command-line tool, that lists the skills of 8 coding agents, counts their use from local chats, and asks AI for new skill ideas. No dependencies, no tests yet.
 
@@ -31,9 +31,9 @@ Command only: `CLI/main.swift` (arguments and help), `CLI/Commands.swift`, `CLI/
 Requirements: macOS 15 or later, Xcode 26 (the `.icon` needs it), and XcodeGen after editing `project.yml`.
 
 ```bash
-scripts/build-release.sh           # universal Release build, Developer ID signed and notarized when the certificate is in the keychain, ad hoc on CI, dist/Skillscout-<version>.zip
-open build/release/Release/Skillscout.app
-build/release/Release/Skillscout.app/Contents/Helpers/skillscout list
+scripts/build-release.sh           # universal Release build, Developer ID signed and notarized when the certificate is in the keychain, ad hoc on CI, dist/Skill Cabinet-<version>.zip
+open "build/release/Release/Skill Cabinet.app"
+"build/release/Release/Skill Cabinet.app/Contents/Helpers/skillscout" list
 xcodegen generate                  # after editing project.yml
 swift scripts/render-icon.swift    # after editing the icon
 scripts/screenshot.sh              # docs/screenshot-*.png, from a demo home folder
@@ -44,7 +44,7 @@ swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark
 
 ## Rules
 
-- Skillscout only reads chats. It writes to the agents' folders in `SkillInstaller` alone, when the user adds, saves, edits, renames, merges or uninstalls a skill. Uninstalling and merging move folders, links and replaced `SKILL.md` files to the Trash, never delete them, and leave plugin and built-in skills alone. Renaming deletes a link only to create it again under the new name. Editing writes over a `SKILL.md` only while it still has the text the editor opened with, unless the user picks Save anyway.
+- Skill Cabinet only reads chats. It writes to the agents' folders in `SkillInstaller` alone, when the user adds, saves, edits, renames, merges or uninstalls a skill. Uninstalling and merging move folders, links and replaced `SKILL.md` files to the Trash, never delete them, and leave plugin and built-in skills alone. Renaming deletes a link only to create it again under the new name. Editing writes over a `SKILL.md` only while it still has the text the editor opened with, unless the user picks Save anyway.
 - Edit `SKILL.md` text with `PlainTextEditor`, never SwiftUI's `TextEditor`, which follows the system's smart quotes and dashes and breaks the commands in a skill.
 - Renames and merges record the old name in `aliases.json`, so `SkillUsage.tally` keeps counting the chats that used it.
 - Apart from the daily update check on GitHub, the app makes no network requests of its own. The AI features run the user's Codex CLI (`--ephemeral`, read-only sandbox) or Claude Code CLI (`--no-session-persistence`, no tools). The README's Privacy section describes this, so keep it accurate if it changes.
@@ -52,8 +52,8 @@ swift scripts/render-banner.swift  # docs/banner.png, from the icon and the dark
 - When an agent's folders or read rules change in `Tool`, update the agents table in the README.
 - Never use real skills or chats in screenshots, the banner or demos. `scripts/screenshot.sh` builds made-up ones in `build/demo-home`, under its own bundle ID. Test adding, uninstalling, renaming and merging against a made-up home too, since `Paths.home` follows `$HOME`. The Codex and Claude Code CLIs can't log in under a made-up home, so a merge test drafts with the real `HOME` and applies under the made-up one. Test copies still go to the real Trash, so clean them up. The shell can't list `~/.Trash`, but Finder can: `osascript -e 'tell application "Finder" to get name of every item of trash'`.
 - `scripts/screenshot.sh` draws the sidebar dimmed when its app loses focus to Cursor partway through, so look at every image. If one is dimmed, run it again while activating the app in a loop: `osascript -e 'tell application id "com.flaviocopes.skillscout.screenshot" to activate'`.
-- Verify UI changes by building the app and opening it. The user runs `build/release/Release/Skillscout.app`, so rebuild it with `scripts/build-release.sh`, then quit and reopen it. A Debug build alone leaves the old app on screen.
+- Verify UI changes by building the app and opening it. The user runs `build/release/Release/Skill Cabinet.app`, so rebuild it with `scripts/build-release.sh`, then quit and reopen it. A Debug build alone leaves the old app on screen.
 - The app isn't sandboxed, because it reads folders across the home folder. Releases are signed with Flavio's Developer ID (team `DGFKNTAG99`) with the hardened runtime, and notarized in `scripts/build-release.sh` when the certificate is in the keychain and the notarytool profile `notary` is set up. CI and forks have no certificate, so the script signs ad hoc there.
 - The updater trusts the GitHub release. Every release needs its `vX.Y.Z` tag, the zip from `scripts/build-release.sh` attached, and a `MARKETING_VERSION` that matches the tag, or the app refuses the update. The update dialog shows the release notes above `## Install`, so the new features go first.
-- The 1-minute demo video comes from the separate Remotion project `~/dev/skillscout-showreel`. It's not part of this repo.
-- The launch post is `src/posts/skillscout.md` in `~/www/flaviocopes.com`, live at flaviocopes.com/skillscout. A release with new features also updates that post and the site's changelog, following that repo's `AGENTS.md`. The post's banner and screenshot in `public/images/skillscout` are `docs/banner.png` and `docs/screenshot-light.png`, resized to 2000px wide with the site's `sharp` as palette PNGs.
+- The 1-minute demo video comes from the separate Remotion project `~/dev/skill-cabinet-showreel`. It's not part of this repo.
+- The launch post is `src/posts/skill-cabinet.md` in `~/www/flaviocopes.com`, live at flaviocopes.com/skill-cabinet. A release with new features also updates that post and the site's changelog, following that repo's `AGENTS.md`. The post's banner and screenshot in `public/images/skillscout` are `docs/banner.png` and `docs/screenshot-light.png`, resized to 2000px wide with the site's `sharp` as palette PNGs.

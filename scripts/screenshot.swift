@@ -1,4 +1,4 @@
-// Captures the real Skillscout window for the README and the banner, in light and dark.
+// Captures the real Skill Cabinet window for the README and the banner, in light and dark.
 // It builds a demo home folder with made-up skills first, so no real chats end up in a screenshot.
 // scripts/screenshot.sh compiles it with the app's sources, in place of SkillscoutApp.swift.
 

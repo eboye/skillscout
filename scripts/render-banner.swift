@@ -7,7 +7,7 @@
 import AppKit
 import SwiftUI
 
-let name = "Skillscout"
+let name = "Skill Cabinet"
 let tagline = "Your agent skills in one place,\nand the ones you keep asking for."
 let chips = ["8 coding agents", "Usage counts", "Skill ideas"]
 let size = CGSize(width: 1280, height: 560)
@@ -94,7 +94,7 @@ struct Banner: View {
           .frame(width: 132, height: 132)
           .shadow(color: .black.opacity(0.35), radius: 18, y: 10)
         Text(name)
-          .font(.system(size: 76, weight: .bold))
+          .font(.system(size: 64, weight: .bold))
           .tracking(-1.8)
           .foregroundStyle(.white)
           .padding(.top, 26)

@@ -5,11 +5,11 @@ struct SkillscoutApp: App {
   @State private var store = AppStore()
 
   init() {
-    AppUpdater.shared.start(repository: "flaviocopes/skillscout")
+    AppUpdater.shared.start(repository: "flaviocopes/skill-cabinet")
   }
 
   var body: some Scene {
-    Window("Skillscout", id: "main") {
+    Window("Skill Cabinet", id: "main") {
       ContentView()
         .environment(store)
         .task { await store.start() }

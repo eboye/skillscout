@@ -127,7 +127,7 @@ enum Command: String, CaseIterable {
     case .list: "List your skills and the tools that load them"
     case .show: "Where a skill lives, which tools see it, and its usage"
     case .usage: "Rank skills by how many chats used them"
-    case .tools: "The agent tools Skillscout knows about"
+    case .tools: "The agent tools Skill Cabinet knows about"
     case .similar: "Pairs of skills that read alike"
     case .add: "Add a skill to another tool"
     case .rename: "Give a skill a new name"
@@ -147,7 +147,7 @@ enum Command: String, CaseIterable {
     case .usage:
       "Ranks skills by the number of chats that used them. A use is a chat where the agent read the skill's SKILL.md, or where you attached or invoked the skill yourself."
     case .tools:
-      "Lists the agent tools Skillscout knows, whether they're on, and where each one keeps its skills. Turn tools on or off in the app's settings."
+      "Lists the agent tools Skill Cabinet knows, whether they're on, and where each one keeps its skills. Turn tools on or off in the app's settings."
     case .similar:
       "Compares the words your skills use, on your Mac and without AI, and lists the pairs that read alike, so you can merge them. Pairs you dismissed in the app stay hidden."
     case .rename:
@@ -155,7 +155,7 @@ enum Command: String, CaseIterable {
     case .merge:
       "Asks AI to write one SKILL.md from two skills, and makes it the SKILL.md of the first one. The old SKILL.md and the other skill go to the Trash, and the first skill gets linked wherever the other one was, so no tool loses it. The other skill's files come along, unless the first one has a file at the same path."
     case .add:
-      "Makes a skill available in another tool. Skillscout links the skill folder into that tool's skills folder, so an edit shows up everywhere. Plugin skills get copied instead, since plugin updates replace their folders."
+      "Makes a skill available in another tool. Skill Cabinet links the skill folder into that tool's skills folder, so an edit shows up everywhere. Plugin skills get copied instead, since plugin updates replace their folders."
     case .uninstall:
       "Moves every copy of a skill in your skills folders to the Trash, so you can put it back from there. A link goes on its own, and the folder it points to stays. Plugin and built-in copies stay too, since their tools manage them."
     case .suggest:
@@ -228,11 +228,12 @@ enum Command: String, CaseIterable {
 func printHelp(_ command: Command?) {
   let bold = Terminal.bold
   guard let command else {
-    print(Terminal.wrap("Skillscout finds the skills your coding agents load, shows which tools can use each one, and counts how often you use them."))
+    print(Terminal.wrap("Skill Cabinet finds the skills your coding agents load, shows which tools can use each one, and counts how often you use them."))
     print()
     print("\(bold("Usage:")) skillscout [command] [options]")
     print()
     print(bold("Commands:"))
+    print("  capabilities       What the tool can do, and its release history")
     for command in Command.allCases {
       let name = command.synopsis.split(separator: " ").prefix { !$0.hasPrefix("[") && !$0.hasPrefix("-") }.joined(separator: " ")
       print("  \(Terminal.pad(name, 17)) \(command.summary)")
@@ -256,7 +257,48 @@ func printHelp(_ command: Command?) {
 }
 
 var version: String {
-  Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
+  Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5.0"
+}
+
+@MainActor
+func printCapabilities(json: Bool) throws {
+  let manifest: [String: Any] = [
+    "name": "skillscout",
+    "version": version,
+    "summary": "Browse and manage coding-agent skills with Skill Cabinet.",
+    "capabilities": [
+      ["description": "List skills and which coding agents can load them", "command": "skillscout list --json"],
+      ["description": "Show a skill and its usage", "command": "skillscout show flavioify --json"],
+      ["description": "Rank skills by usage in recent chats", "command": "skillscout usage --json"],
+      ["description": "Find similar skills", "command": "skillscout similar --json"],
+      ["description": "Add a skill to another coding agent", "command": "skillscout add flavioify --to codex"],
+      ["description": "Rename a skill and retain usage history", "command": "skillscout rename release-notes launch-notes"],
+      ["description": "Move a skill to the Trash", "command": "skillscout uninstall release-notes"],
+      ["description": "Ask AI for skill ideas", "command": "skillscout suggest --json"]
+    ],
+    "changelog": [
+      ["version": "1.5.0", "date": "2026-10-08", "changes": ["Renamed the app to Skill Cabinet. The skillscout command keeps its existing name.", "New capabilities command lists tasks and release history."]],
+      ["version": "1.4.0", "date": "2026-10-03", "changes": ["Signed and notarized Mac release."]],
+      ["version": "1.3.0", "date": "2026-10-01", "changes": ["Filters skills by personal, plugin and built-in copies."]],
+      ["version": "1.2.0", "date": "2026-10-01", "changes": ["Edit, rename and merge skills in the app."]],
+      ["version": "1.1.0", "date": "2026-09-30", "changes": ["Uninstall skills by moving them to the Trash."]],
+      ["version": "1.0.0", "date": "2026-09-30", "changes": ["First release: browse skills and usage from coding-agent chats."]]
+    ]
+  ]
+  if json {
+    let data = try JSONSerialization.data(withJSONObject: manifest, options: [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes])
+    print(String(decoding: data, as: UTF8.self))
+  } else {
+    print("skillscout \(version)\n" + (manifest["summary"] as! String) + "\n\nWhat it can do:")
+    for capability in manifest["capabilities"] as! [[String: String]] {
+      print("  \(capability["description"]!)\n    $ \(capability["command"]!)")
+    }
+    print("\nChanges:")
+    for release in manifest["changelog"] as! [[String: Any]] {
+      print("  \(release["version"]!) (\(release["date"]!))")
+      for change in release["changes"] as! [String] { print("    - \(change)") }
+    }
+  }
 }
 
 do {
@@ -265,6 +307,8 @@ do {
 
   if args.flag("version") {
     print("skillscout \(version)")
+  } else if args.command == "capabilities" {
+    try printCapabilities(json: args.json)
   } else if args.command == "help" {
     let name = args.positional.first
     guard let command = name.map(Command.init(rawValue:)) ?? .some(nil) else {
