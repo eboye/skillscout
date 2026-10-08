@@ -53,6 +53,9 @@ for icon in Linux/icons/*/com.flaviocopes.skillscout.png; do
   size="$(basename "$(dirname "$icon")")"
   install -Dm644 "$icon" "$dest/share/icons/hicolor/$size/apps/com.flaviocopes.skillscout.png"
 done
+for icon in Linux/icons/scalable/actions/*.svg; do
+  install -Dm644 "$icon" "$dest/share/icons/hicolor/scalable/actions/$(basename "$icon")"
+done
 
 if [ -z "${DESTDIR:-}" ]; then
   gtk-update-icon-cache -q -t "$prefix/share/icons/hicolor" 2>/dev/null || true

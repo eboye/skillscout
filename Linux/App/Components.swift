@@ -101,6 +101,25 @@ enum Desktop {
   }
 }
 
+/// The app's own icons, in Linux/icons. Installed, they're in the hicolor theme next to the app;
+/// in a build from the repo, the icon theme looks for them in the repo itself.
+@MainActor
+enum AppIcons {
+  private static var added = false
+
+  static func addSearchPaths() {
+    guard !added, let display = gdk_display_get_default(), let theme = gtk_icon_theme_get_for_display(display) else { return }
+    added = true
+    let installed = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath()
+      .deletingLastPathComponent().deletingLastPathComponent().appending(path: "share/icons")
+    // GTK takes loose icons straight from a search path, and themes from its subfolders.
+    let repo = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().appending(path: "icons/scalable/actions")
+    for folder in [installed, repo] where FileManager.default.fileExists(atPath: folder.path) {
+      gtk_icon_theme_add_search_path(theme, folder.path)
+    }
+  }
+}
+
 /// The badge colors, and a few spacing rules libadwaita has no style class for.
 let appCSS: String = {
   var css = """

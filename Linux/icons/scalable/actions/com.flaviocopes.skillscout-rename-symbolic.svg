@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- Rename, after SF Symbols' character.cursor.ibeam in the Mac app's toolbar: a letter, then a
+       text cursor. Filled shapes only, since GTK draws symbolic icons from fills. -->
+  <path d="M5 6a3.75 3.75 0 1 0 0 7.5A3.75 3.75 0 0 0 5 6zm0 1.5a2.25 2.25 0 1 1 0 4.5 2.25 2.25 0 0 1 0-4.5z" fill="#241f31" fill-rule="evenodd"/>
+  <rect x="7.25" y="6" width="1.5" height="7.5" rx=".75" fill="#241f31"/>
+  <rect x="12.4" y="2" width="1.2" height="12" rx=".6" fill="#241f31"/>
+  <rect x="11" y="1.4" width="4" height="1.2" rx=".6" fill="#241f31"/>
+  <rect x="11" y="13.4" width="4" height="1.2" rx=".6" fill="#241f31"/>
+</svg>

@@ -194,17 +194,20 @@ struct ContentView: View {
     .topToolbar {
       HeaderBar {
       } end: {
+        // The end of a header bar fills from the right, so these show as Edit, Rename, Uninstall,
+        // like the Mac toolbar. Edit and Rename use the app's own icons, after the Mac's SF Symbols,
+        // since icon themes like Papirus draw the stock edit icons as the same pencil.
         Button(icon: .custom(name: "user-trash-symbolic")) {
           if let skill = actionSkill { store.removal = .uninstall(skill) }
         }
         .tooltip("Uninstall the selected skill from every tool, by moving it to the Trash")
         .insensitive(actionSkill == nil)
-        Button(icon: .custom(name: "document-edit-symbolic")) {
+        Button(icon: .custom(name: "com.flaviocopes.skillscout-rename-symbolic")) {
           store.renaming = actionSkill
         }
         .tooltip("Rename the selected skill")
         .insensitive(actionSkill == nil)
-        Button(icon: .custom(name: "text-editor-symbolic")) {
+        Button(icon: .custom(name: "com.flaviocopes.skillscout-edit-symbolic")) {
           store.editing = actionSkill
         }
         .tooltip("Edit the selected skill's SKILL.md")

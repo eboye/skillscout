@@ -37,6 +37,7 @@ struct SkillscoutGnome: App {
       ContentView(store: store, model: model, app: app)
         .inspect { [renderer] _, data, _ in renderer.attach(data.stateManager) }
         .onAppear {
+          AppIcons.addSearchPaths()
           Task { await store.start() }
           Screenshot.scheduleIfAsked(window: window, store: store, model: model, app: app)
         }

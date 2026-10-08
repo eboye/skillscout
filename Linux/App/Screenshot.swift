@@ -11,11 +11,11 @@ enum Screenshot {
   static func scheduleIfAsked(window: AdwaitaWindow, store: AppStore, model: WindowModel, app: AdwaitaApp) {
     let environment = ProcessInfo.processInfo.environment
     guard let path = environment["SKILLSCOUT_SCREENSHOT"] else { return }
-    // A made-up home can't see the icon theme you picked, so use the stock one.
+    // A made-up home can't see the icon theme you picked, so use the stock one, or SKILLSCOUT_ICON_THEME.
     var theme = GValue()
     g_value_init(&theme, GType(16 << 2))  // G_TYPE_STRING, a macro Swift can't import
-    g_value_set_string(&theme, "Adwaita")
-    if environment["SKILLSCOUT_KEEP_THEME"] == nil { g_object_set_property(gtk_settings_get_default()?.cast(), "gtk-icon-theme-name", &theme) }
+    g_value_set_string(&theme, environment["SKILLSCOUT_ICON_THEME"] ?? "Adwaita")
+    g_object_set_property(gtk_settings_get_default()?.cast(), "gtk-icon-theme-name", &theme)
     g_value_unset(&theme)
     // Dialogs open with an animation that can stall while the window is covered, so skip it.
     var animations = GValue()
