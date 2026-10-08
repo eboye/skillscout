@@ -2,7 +2,7 @@
 # Builds a universal (Apple silicon and Intel) Skill Cabinet.app, with the skillscout command
 # inside. Signs with Flavio's Developer ID when the certificate is in the keychain, ad hoc
 # everywhere else (CI, forks). Developer ID builds are notarized, stapled, and zipped into
-# dist/Skill Cabinet-<version>.zip. The name and version come from project.yml.
+# dist/Skill-Cabinet-<version>.zip. The name and version come from project.yml.
 # Usage: scripts/build-release.sh
 set -eu
 
@@ -13,7 +13,7 @@ TARGET="Skillscout"
 VERSION=$(sed -n 's/^ *MARKETING_VERSION: "\(.*\)"$/\1/p' project.yml)
 BUILD="$ROOT/build/release"
 APP="$BUILD/Release/$NAME.app"
-ZIP="$ROOT/dist/$NAME-$VERSION.zip"
+ZIP="$ROOT/dist/Skill-Cabinet-$VERSION.zip"
 CHECK=$(mktemp -d)
 
 cleanup() {

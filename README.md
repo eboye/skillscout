@@ -12,7 +12,7 @@ Read the announcement and watch the 1-minute demo on my blog: [I built Skill Cab
 
 ## Download
 
-Get `Skill Cabinet-1.5.0.zip` from the [latest release](https://github.com/flaviocopes/skill-cabinet/releases/latest), unzip it, and drag Skill Cabinet to your Applications folder. It runs on macOS 15 Sequoia or later, on Apple silicon and Intel Macs.
+Get `Skill-Cabinet-1.5.0.zip` from the [latest release](https://github.com/flaviocopes/skill-cabinet/releases/latest), unzip it, and drag Skill Cabinet to your Applications folder. It runs on macOS 15 Sequoia or later, on Apple silicon and Intel Macs.
 
 ### Opening it the first time
 

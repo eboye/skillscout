@@ -31,7 +31,7 @@ Command only: `CLI/main.swift` (arguments and help), `CLI/Commands.swift`, `CLI/
 Requirements: macOS 15 or later, Xcode 26 (the `.icon` needs it), and XcodeGen after editing `project.yml`.
 
 ```bash
-scripts/build-release.sh           # universal Release build, Developer ID signed and notarized when the certificate is in the keychain, ad hoc on CI, dist/Skill Cabinet-<version>.zip
+scripts/build-release.sh           # universal Release build, Developer ID signed and notarized when the certificate is in the keychain, ad hoc on CI, dist/Skill-Cabinet-<version>.zip
 open "build/release/Release/Skill Cabinet.app"
 "build/release/Release/Skill Cabinet.app/Contents/Helpers/skillscout" list
 xcodegen generate                  # after editing project.yml
