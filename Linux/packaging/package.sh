@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Builds Skillscout and packs it for Linux, into build/packages:
+# Builds Skill Cabinet and packs it for Linux, into build/packages:
 #
 #   Linux/packaging/package.sh deb rpm tarball appimage
 #
 #   deb       skillscout_<version>-<release>_<arch>.deb, with nfpm
 #   rpm       skillscout-<version>-<release>.<arch>.rpm, with nfpm
 #   tarball   skillscout-<version>-linux-<arch>.tar.gz, to unpack into ~/.local or /usr/local
-#   appimage  Skillscout-<version>-<arch>.AppImage, with GTK and libadwaita inside, via linuxdeploy
+#   appimage  Skill-Cabinet-<version>-<arch>.AppImage, with GTK and libadwaita inside, via linuxdeploy
 #
 # The version is upstream's, MARKETING_VERSION in project.yml, so Linux packages follow the Mac
 # releases. RELEASE (default 1) counts Linux builds of one version. nfpm, linuxdeploy and its GTK
@@ -56,7 +56,7 @@ for format in "$@"; do
       rm -rf "build/$name"
       ;;
     appimage)
-      Linux/packaging/appimage.sh "$packages/Skillscout-$VERSION-$machine.AppImage"
+      Linux/packaging/appimage.sh "$packages/Skill-Cabinet-$VERSION-$machine.AppImage"
       ;;
     *)
       echo "Unknown format: $format" >&2

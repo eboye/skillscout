@@ -2,7 +2,7 @@ name: Linux packages
 
 # Builds the Linux packages: .deb, .rpm, Arch, Flatpak, AppImage and a tarball. On a tag, it puts
 # them on the tag's GitHub release. Tags follow upstream's version, MARKETING_VERSION in
-# project.yml: v1.4.0, or v1.4.0-linux.2 for a second Linux build of the same version.
+# project.yml: v1.5.0-linux.1, then v1.5.0-linux.2 for a second Linux build of the same version.
 on:
   push:
     tags: ['v*']

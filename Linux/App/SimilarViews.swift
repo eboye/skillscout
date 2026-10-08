@@ -10,7 +10,7 @@ struct SimilarList: View {
       StatusPage(
         "No similar skills",
         icon: .custom(name: "view-dual-symbolic"),
-        description: "Skillscout compares the words your skills use. When two of them cover the same ground, they show up here, so you can merge them."
+        description: "Skill Cabinet compares the words your skills use. When two of them cover the same ground, they show up here, so you can merge them."
       )
       .vexpand()
     } else {
@@ -98,7 +98,7 @@ struct SimilarDetail: View {
         VStack(spacing: 4) {
           Button("They're Different Skills") { store.dismissPair(pair) }
             .halign(.start)
-          paragraph("Skillscout won't pair them again.").caption().dimLabel()
+          paragraph("Skill Cabinet won't pair them again.").caption().dimLabel()
         }
       }
       .style("detail")

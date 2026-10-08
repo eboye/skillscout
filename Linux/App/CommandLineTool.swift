@@ -28,7 +28,7 @@ enum CommandLineTool {
       if (try? fm.destinationOfSymbolicLink(atPath: link.path)) != nil {
         try fm.removeItem(at: link)
       } else if fm.fileExists(atPath: link.path) {
-        return "\(Paths.abbreviate(link)) already exists and isn't a link, so Skillscout left it alone."
+        return "\(Paths.abbreviate(link)) already exists and isn't a link, so Skill Cabinet left it alone."
       }
       try fm.createSymbolicLink(at: link, withDestinationURL: bundled)
     } catch {
@@ -42,11 +42,11 @@ enum CommandLineTool {
   private static func installFlatpakWrapper() -> String {
     let fm = FileManager.default
     let id = ProcessInfo.processInfo.environment["FLATPAK_ID"] ?? "com.flaviocopes.skillscout"
-    let script = "#!/bin/sh\n# Runs the skillscout command from the Skillscout Flatpak.\nexec flatpak run --command=skillscout \(id) \"$@\"\n"
+    let script = "#!/bin/sh\n# Runs the skillscout command from the Skill Cabinet Flatpak.\nexec flatpak run --command=skillscout \(id) \"$@\"\n"
     if fm.fileExists(atPath: link.path) || (try? fm.destinationOfSymbolicLink(atPath: link.path)) != nil {
       let current = (try? String(contentsOf: link, encoding: .utf8)) ?? ""
       guard current.contains("flatpak run --command=skillscout") else {
-        return "\(Paths.abbreviate(link)) already exists, so Skillscout left it alone."
+        return "\(Paths.abbreviate(link)) already exists, so Skill Cabinet left it alone."
       }
     }
     do {

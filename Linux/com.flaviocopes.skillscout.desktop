@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=Skillscout
+Name=Skill Cabinet
 GenericName=Agent Skills
 Comment=Find the skills your coding agents load, see which agents can use each one, and count how often you use them
 Exec=skillscout-gnome

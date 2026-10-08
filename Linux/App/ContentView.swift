@@ -73,7 +73,7 @@ struct ContentView: View {
   var view: Body {
     NavigationSplitView {
       SidebarPane(store: store, model: model, app: app, skills: librarySkills, missing: librarySkills.count(where: isMissing), pairs: listedPairs.count)
-        .navigationTitle("Skillscout")
+        .navigationTitle("Skill Cabinet")
     } content: {
       NavigationSplitView {
         listPane
@@ -281,7 +281,7 @@ struct SidebarPane: View {
             }
             MenuButton("Keyboard Shortcuts") { model.showShortcuts = true }
               .keyboardShortcut("question".ctrl())
-            MenuButton("About Skillscout") { model.showAbout = true }
+            MenuButton("About Skill Cabinet") { model.showAbout = true }
           }
           MenuSection {
             MenuButton("Quit", window: false) { app.quit() }
@@ -291,9 +291,9 @@ struct SidebarPane: View {
         .primary()
         .tooltip("Main Menu")
       }
-      .headerBarTitle { WindowTitle(subtitle: "", title: "Skillscout") }
+      .headerBarTitle { WindowTitle(subtitle: "", title: "Skill Cabinet") }
     }
-    .navigationTitle("Skillscout")
+    .navigationTitle("Skill Cabinet")
   }
 
   private func section(_ title: String, _ entries: [Entry]) -> AnyView {

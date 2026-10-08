@@ -1,9 +1,9 @@
-# Skillscout as a Flatpak, on the GNOME 50 runtime with the Swift SDK extension:
+# Skill Cabinet as a Flatpak, on the GNOME 50 runtime with the Swift SDK extension:
 #
 #   flatpak-builder --user --install-deps-from=flathub --force-clean --repo=build/flatpak-repo \
 #     build/flatpak Linux/packaging/flatpak/com.flaviocopes.skillscout.yml
 #
-# Skillscout reads and changes the agents' folders across your home folder, so it gets the home
+# Skill Cabinet reads and changes the agents' folders across your home folder, so it gets the home
 # folder. It runs the Codex and Claude Code CLIs on the host through flatpak-spawn, which needs
 # org.freedesktop.Flatpak. SwiftPM fetches the dependencies while building, so the build has the
 # network.

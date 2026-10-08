@@ -115,7 +115,7 @@ struct Removal {
 
   func message(tools: [Tool]) -> String {
     let folders = copies.map { Paths.abbreviate($0.root.url) }
-    var sentences = ["Skillscout moves it to the Trash from \(folders.formatted(.list(type: .and)))."]
+    var sentences = ["Skill Cabinet moves it to the Trash from \(folders.formatted(.list(type: .and)))."]
 
     let losing = tools.filter(skill.toolsLosing(copies).contains)
     if losing.isEmpty {
@@ -152,7 +152,7 @@ extension SkillInstaller.MergePlan {
   /// Every change, with the folders, for the confirmation.
   func message(tools: [Tool]) -> String {
     let places = folders.map(Paths.abbreviate).formatted(.list(type: .and))
-    var sentences = ["Skillscout writes the merged SKILL.md into \(places), and moves the old \(folders.count == 1 ? "one" : "ones") to the Trash."]
+    var sentences = ["Skill Cabinet writes the merged SKILL.md into \(places), and moves the old \(folders.count == 1 ? "one" : "ones") to the Trash."]
     if !copiedFiles.isEmpty {
       sentences.append("It copies over \(plural(copiedFiles.count, "file")) from \(merged.name).")
     }

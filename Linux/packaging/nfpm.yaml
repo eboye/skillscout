@@ -9,7 +9,7 @@ section: devel
 priority: optional
 maintainer: Vasilj Milošević <624357+eboye@users.noreply.github.com>
 vendor: Flavio Copes
-homepage: https://github.com/flaviocopes/skillscout
+homepage: https://github.com/flaviocopes/skill-cabinet
 license: MIT
 description: |
   Find the skills your coding agents load, see which agents can use each one,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>com.flaviocopes.skillscout</id>
-  <name>Skillscout</name>
+  <name>Skill Cabinet</name>
   <summary>See the skills your coding agents load</summary>
   <developer id="com.flaviocopes">
     <name>Flavio Copes</name>
@@ -10,7 +10,7 @@
   <project_license>MIT</project_license>
   <description>
     <p>
-      Skillscout finds every skill your coding agents load, shows which agents can see each one,
+      Skill Cabinet finds every skill your coding agents load, shows which agents can see each one,
       and counts how often you use them. It knows Cursor, Claude Code, Codex, Gemini CLI, OpenCode,
       Droid, Pi and Amp.
     </p>
@@ -22,14 +22,15 @@
     </ul>
   </description>
   <launchable type="desktop-id">com.flaviocopes.skillscout.desktop</launchable>
-  <url type="homepage">https://flaviocopes.com/skillscout/</url>
-  <url type="bugtracker">https://github.com/flaviocopes/skillscout/issues</url>
+  <url type="homepage">https://flaviocopes.com/skill-cabinet/</url>
+  <url type="bugtracker">https://github.com/flaviocopes/skill-cabinet/issues</url>
   <provides>
     <binary>skillscout</binary>
     <binary>skillscout-gnome</binary>
   </provides>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="1.5.0" date="2026-10-08"/>
     <release version="1.4.0" date="2026-10-05"/>
   </releases>
 </component>

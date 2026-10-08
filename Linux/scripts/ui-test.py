@@ -85,7 +85,7 @@ def descendants(pid: int) -> set[int]:
     return found
 
 
-NAMES = ("skillscout-gnome", "Skillscout", "com.flaviocopes.skillscout")
+NAMES = ("skillscout-gnome", "Skill Cabinet", "Skillscout", "com.flaviocopes.skillscout")
 ALREADY_OPEN: set[int] = set()
 
 
@@ -101,7 +101,7 @@ def skillscout_apps():
 
 
 def app_root():
-    """The app this test started, never a Skillscout you have open with your real skills: one
+    """The app this test started, never a Skill Cabinet you have open with your real skills: one
     whose process this test launched, or, for a Flatpak, whose accessibility proxy reports another
     process, one that wasn't on the bus before the test."""
     ours = descendants(next(iter(LAUNCHED))) if LAUNCHED else set()
@@ -191,7 +191,7 @@ def main() -> int:
         env = dict(os.environ)
     else:
         env = {k: v for k, v in os.environ.items() if k not in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "DISPLAY")}
-        # SKILLSCOUT_TEST keeps this run from handing over to a Skillscout that's already open.
+        # SKILLSCOUT_TEST keeps this run from handing over to a Skill Cabinet that's already open.
         env.update(HOME=str(HOME), SHELL="/bin/bash", SKILLSCOUT_TEST="1")
     ALREADY_OPEN.update(pid for _, pid in skillscout_apps())
     app = subprocess.Popen(APP, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

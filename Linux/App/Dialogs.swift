@@ -83,7 +83,7 @@ extension AnyView {
       .preferences(store: store, model: model)
       .aboutDialog(
         visible: Binding { model.showAbout } set: { model.showAbout = $0 },
-        app: "Skillscout",
+        app: "Skill Cabinet",
         developer: "Flavio Copes",
         version: appVersion,
         icon: .custom(name: "com.flaviocopes.skillscout"),
@@ -93,8 +93,8 @@ extension AnyView {
           .licenseType(.mitX11),
         ],
         links: [
-          .website(URL(string: "https://flaviocopes.com/skillscout/")),
-          .issues(URL(string: "https://github.com/flaviocopes/skillscout/issues")),
+          .website(URL(string: "https://flaviocopes.com/skill-cabinet/")),
+          .issues(URL(string: "https://github.com/flaviocopes/skill-cabinet/issues")),
         ]
       )
       .shortcutsDialog(visible: Binding { model.showShortcuts } set: { model.showShortcuts = $0 }, id: "shortcuts")
@@ -125,13 +125,13 @@ extension AnyView {
     return preferencesDialog(visible: Binding { model.showPreferences } set: { model.showPreferences = $0 }, id: "preferences")
       .preferencesPage("General", icon: .custom(name: "preferences-system-symbolic")) { page in
         page
-          .group("Tools", description: "Skillscout shows the skills these tools load, and reads their chats for usage and repeated tasks.") {
+          .group("Tools", description: "Skill Cabinet shows the skills these tools load, and reads their chats for usage and repeated tasks.") {
             Tool.allCases.map { tool -> AnyView in
               SwitchRow(tool.name, isOn: Binding { store.tools.contains(tool) } set: { store.setTool(tool, enabled: $0) })
                 .subtitle(tool.isInstalled ? "" : "Not found on this computer")
             }
           }
-          .group("AI", description: "Skillscout runs the CLI you're already logged in to. These runs aren't saved to your chat history.") {
+          .group("AI", description: "Skill Cabinet runs the CLI you're already logged in to. These runs aren't saved to your chat history.") {
             ComboRow(
               "Engine",
               selection: setting("engine", { engine.rawValue }, { defaults.set($0, forKey: "engine") }),
@@ -171,7 +171,7 @@ extension AnyView {
   }
 }
 
-let appVersion = "1.4.0"
+let appVersion = "1.5.0"
 
 struct RenameView: View {
   let store: AppStore
@@ -190,7 +190,7 @@ struct RenameView: View {
     var what: [String] = []
     if folders > 0 { what.append(folders == 1 ? "its folder" : "its \(folders) folders") }
     if links > 0 { what.append(links == 1 ? "the link to it" : "the \(links) links to it") }
-    var sentences = ["Skillscout renames \(list(what)), and changes the name in SKILL.md."]
+    var sentences = ["Skill Cabinet renames \(list(what)), and changes the name in SKILL.md."]
 
     let targets = skill.linkTargetsKept(skill.removableCopies)
     if !targets.isEmpty {
@@ -242,7 +242,7 @@ struct EditView: View {
 
   private var note: String {
     guard let edit = model.edit else { return "" }
-    var sentences = ["Skillscout saves it to \(list(edit.files.map(Paths.abbreviate)))."]
+    var sentences = ["Skill Cabinet saves it to \(list(edit.files.map(Paths.abbreviate)))."]
     if !edit.otherFiles.isEmpty {
       let one = edit.otherFiles.count == 1
       sentences.append("\(list(edit.otherFiles.map(Paths.abbreviate))) \(one ? "has" : "have") other text, so \(one ? "it stays as it is" : "they stay as they are").")

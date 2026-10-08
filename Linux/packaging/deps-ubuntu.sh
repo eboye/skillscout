@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs what building Skillscout needs on Ubuntu 26.04 or Debian testing: the Swift toolchain's
+# Installs what building Skill Cabinet needs on Ubuntu 26.04 or Debian testing: the Swift toolchain's
 # own dependencies, GTK 4, libadwaita, SQLite, and the tools the packaging scripts run.
 set -euo pipefail
 export DEBIAN_FRONTEND=noninteractive

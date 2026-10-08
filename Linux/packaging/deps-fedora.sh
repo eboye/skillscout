@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Installs what building Skillscout needs on Fedora 44 or later: the Swift toolchain's own
+# Installs what building Skill Cabinet needs on Fedora 44 or later: the Swift toolchain's own
 # dependencies, GTK 4, libadwaita, SQLite, and the tools the packaging and AppImage scripts run.
 set -euo pipefail
 dnf install -y -q \

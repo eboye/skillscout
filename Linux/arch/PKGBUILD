@@ -1,4 +1,4 @@
-# Builds Skillscout for Arch Linux from the commit this checkout has checked out:
+# Builds Skill Cabinet for Arch Linux from the commit this checkout has checked out:
 #
 #   cd Linux/arch && makepkg -si
 #
@@ -6,11 +6,11 @@
 # makepkg -si --nodeps, and keep gtk4, libadwaita and sqlite installed.
 
 pkgname=skillscout
-pkgver=1.4.0
+pkgver=1.5.0
 pkgrel=1
 pkgdesc="Find the skills your coding agents load, see which agents can use each one, and count how often you use them"
 arch=('x86_64' 'aarch64')
-url="https://github.com/flaviocopes/skillscout"
+url="https://github.com/flaviocopes/skill-cabinet"
 license=('MIT')
 depends=('gtk4' 'libadwaita' 'glib2' 'sqlite' 'gcc-libs' 'glibc')
 makedepends=('swift-language' 'git' 'patchelf')

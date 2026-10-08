@@ -23,7 +23,7 @@ struct SkillscoutGnome: App {
   init() {
     renderer = Renderer(store: store, model: model)
     // GApplication hands a second launch over to the copy that's already open. A test or a
-    // screenshot runs against a made-up home, so it must never reach the Skillscout you have open.
+    // screenshot runs against a made-up home, so it must never reach the Skill Cabinet you have open.
     let environment = ProcessInfo.processInfo.environment
     if environment["SKILLSCOUT_TEST"] != nil || environment["SKILLSCOUT_SCREENSHOT"] != nil {
       let flags = g_application_get_flags(app.pointer?.cast()).rawValue | GApplicationFlags.APPLICATION_NON_UNIQUE.rawValue
@@ -41,7 +41,7 @@ struct SkillscoutGnome: App {
           Screenshot.scheduleIfAsked(window: window, store: store, model: model, app: app)
         }
     }
-    .title("Skillscout")
+    .title("Skill Cabinet")
     .defaultSize(width: 1180, height: 760)
     .minSize(width: 360, height: 480)
     .keyboardShortcut("f".ctrl()) { _ in store.searchRequests += 1 }

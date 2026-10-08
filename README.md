@@ -289,11 +289,11 @@ On Linux, that data lives in `~/.local/share/skillscout`, and the app makes no r
 
 ## Linux
 
-Skillscout also runs on Linux, as a GNOME app and the same `skillscout` command. The app is built with [Adwaita for Swift](https://codeberg.org/aparoksha/adwaita-swift), on the same core as the Mac app, so it finds the same skills, reads the same chats, and makes the same changes. The agents keep their folders in the same places on Linux.
+Skill Cabinet also runs on Linux, as a GNOME app and the same `skillscout` command. The app is built with [Adwaita for Swift](https://codeberg.org/aparoksha/adwaita-swift), on the same core as the Mac app, so it finds the same skills, reads the same chats, and makes the same changes. The agents keep their folders in the same places on Linux.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-linux-dark.png" />
-  <img src="docs/screenshot-linux-light.png" alt="The Skillscout GNOME app with the code-review skill selected" />
+  <img src="docs/screenshot-linux-light.png" alt="The Skill Cabinet GNOME app with the code-review skill selected" />
 </picture>
 
 Each release has packages for Linux:
@@ -326,7 +326,7 @@ On other distributions, install your distribution's GTK 4, libadwaita and SQLite
 Linux/scripts/install.sh
 ```
 
-It installs the app and the command into `~/.local`, with the Swift runtime they need in `~/.local/lib/skillscout`, so they run without a Swift toolchain. Skillscout shows up in your app grid. `PREFIX=/usr` installs it for every user.
+It installs the app and the command into `~/.local`, with the Swift runtime they need in `~/.local/lib/skillscout`, so they run without a Swift toolchain. Skill Cabinet shows up in your app grid. `PREFIX=/usr` installs it for every user.
 
 What's different from the Mac app:
 
@@ -335,9 +335,9 @@ What's different from the Mac app:
 - Settings live in `~/.config/com.flaviocopes.skillscout.plist`, which the command reads too.
 - There's no update check. Update with your package, or run the install again.
 
-For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, `Linux/scripts/ui-test-flatpak.sh` does the same inside the Flatpak, and `Linux/scripts/screenshot.sh` takes screenshots. They run on a headless GNOME display, so nothing opens on your desktop, and they never touch a Skillscout you have open.
+For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, `Linux/scripts/ui-test-flatpak.sh` does the same inside the Flatpak, and `Linux/scripts/screenshot.sh` takes screenshots. They run on a headless GNOME display, so nothing opens on your desktop, and they never touch a Skill Cabinet you have open.
 
-`Linux/packaging/package.sh deb rpm tarball appimage` builds packages into `build/packages`, and `Linux/packaging/flatpak/com.flaviocopes.skillscout.yml` is the Flatpak manifest. The `Linux packages` workflow builds them all, each on the distribution it's for, and attaches them to the release when you push a tag. Linux releases follow the Mac version, `MARKETING_VERSION` in `project.yml`: tag `v1.4.0`, or `v1.4.0-linux.2` for a second Linux build of the same version.
+`Linux/packaging/package.sh deb rpm tarball appimage` builds packages into `build/packages`, and `Linux/packaging/flatpak/com.flaviocopes.skillscout.yml` is the Flatpak manifest. The `Linux packages` workflow builds them all, each on the distribution it's for, and attaches them to the release when you push a tag. Linux releases follow the Mac version, `MARKETING_VERSION` in `project.yml`, and a fork tags them `v1.5.0-linux.1`, then `v1.5.0-linux.2` for a second Linux build of the same version.
 
 ## Build it from source
 

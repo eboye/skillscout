@@ -13,7 +13,7 @@ struct SuggestionList: View {
         icon: .custom(name: "dialog-information-symbolic"),
         description: store.isAnalyzing
           ? "Reading your \(min(store.prompts.count, Analyzer.maxMessages)) most recent messages. This takes a minute or two."
-          : "Skillscout reads your recent messages and finds tasks you ask for again and again."
+          : "Skill Cabinet reads your recent messages and finds tasks you ask for again and again."
       ) {
         if store.isAnalyzing {
           Spinner()

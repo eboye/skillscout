@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds Skillscout for Linux and installs it: the GNOME app, the skillscout command, the Swift
+# Builds Skill Cabinet for Linux and installs it: the GNOME app, the skillscout command, the Swift
 # runtime they link to, the desktop entry, the icons and the AppStream metadata.
 #
 #   Linux/scripts/install.sh                      installs into ~/.local
@@ -58,4 +58,4 @@ if [ -z "${DESTDIR:-}" ]; then
   gtk-update-icon-cache -q -t "$prefix/share/icons/hicolor" 2>/dev/null || true
   update-desktop-database -q "$prefix/share/applications" 2>/dev/null || true
 fi
-echo "Installed Skillscout in $dest"
+echo "Installed Skill Cabinet in $dest"
