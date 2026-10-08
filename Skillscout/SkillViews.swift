@@ -266,7 +266,7 @@ struct Removal {
 
   func message(tools: [Tool]) -> String {
     let folders = copies.map { Paths.abbreviate($0.root.url) }
-    var sentences = ["Skillscout moves it to the Trash from \(folders.formatted(.list(type: .and)))."]
+    var sentences = ["Skill Cabinet moves it to the Trash from \(folders.formatted(.list(type: .and)))."]
 
     let losing = tools.filter(skill.toolsLosing(copies).contains)
     if losing.isEmpty {
@@ -310,7 +310,7 @@ struct RenameSheet: View {
     var what: [String] = []
     if folders > 0 { what.append(folders == 1 ? "its folder" : "its \(folders) folders") }
     if links > 0 { what.append(links == 1 ? "the link to it" : "the \(links) links to it") }
-    var sentences = ["Skillscout renames \(what.formatted(.list(type: .and))), and changes the name in SKILL.md."]
+    var sentences = ["Skill Cabinet renames \(what.formatted(.list(type: .and))), and changes the name in SKILL.md."]
 
     let targets = skill.linkTargetsKept(skill.removableCopies)
     if !targets.isEmpty {
@@ -374,7 +374,7 @@ struct EditSheet: View {
 
   private var note: String {
     guard let edit else { return "" }
-    var sentences = ["Skillscout saves it to \(edit.files.map(Paths.abbreviate).formatted(.list(type: .and)))."]
+    var sentences = ["Skill Cabinet saves it to \(edit.files.map(Paths.abbreviate).formatted(.list(type: .and)))."]
     if !edit.otherFiles.isEmpty {
       let one = edit.otherFiles.count == 1
       sentences.append("\(edit.otherFiles.map(Paths.abbreviate).formatted(.list(type: .and))) \(one ? "has" : "have") other text, so \(one ? "it stays as it is" : "they stay as they are").")

@@ -6,8 +6,8 @@ options:
 settings:
   base:
     SWIFT_VERSION: "6.0"
-    MARKETING_VERSION: "1.4.0"
-    CURRENT_PROJECT_VERSION: "5"
+    MARKETING_VERSION: "1.5.0"
+    CURRENT_PROJECT_VERSION: "6"
 targets:
   Skillscout:
     type: application
@@ -24,7 +24,9 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.flaviocopes.skillscout
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_CFBundleDisplayName: Skillscout
+        INFOPLIST_KEY_CFBundleDisplayName: Skill Cabinet
+        PRODUCT_NAME: "Skill Cabinet"
+        PRODUCT_MODULE_NAME: Skillscout
         INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual

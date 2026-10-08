@@ -17,7 +17,7 @@ enum SkillInstaller {
       switch self {
       case .alreadyExists(let url): "\(Paths.abbreviate(url)) already exists."
       case .builtIn(let name): "\(name) is built into its tool and can't be moved."
-      case .managed(let url): "\(Paths.abbreviate(url)) belongs to a plugin or to its tool, so Skillscout leaves it alone."
+      case .managed(let url): "\(Paths.abbreviate(url)) belongs to a plugin or to its tool, so Skill Cabinet leaves it alone."
       case .changedOnDisk(let url): "\(Paths.abbreviate(url)) changed since you started editing it."
       case .problem(let problem): problem
       }

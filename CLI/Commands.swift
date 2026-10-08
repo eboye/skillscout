@@ -232,7 +232,7 @@ enum Commands {
 
     if Terminal.isTTY {
       print()
-      print(dim("Messages cover the last \(library.days) days. Turn tools on or off in the Skillscout app's settings."))
+      print(dim("Messages cover the last \(library.days) days. Turn tools on or off in the Skill Cabinet app's settings."))
     }
   }
 
@@ -396,7 +396,7 @@ enum Commands {
   /// The error for a skill that a plugin or a tool manages.
   private static func leftAlone(_ skill: Skill) -> CLIError {
     let owner = skill.isBuiltInOnly ? skill.primary.root.owner?.name ?? "its tool" : "the \(skill.primary.sourceLabel)"
-    return CLIError(message: "\(skill.name) belongs to \(owner), so Skillscout leaves it alone.")
+    return CLIError(message: "\(skill.name) belongs to \(owner), so Skill Cabinet leaves it alone.")
   }
 
   static func suggest(_ args: Arguments) async throws {
@@ -465,7 +465,7 @@ enum Commands {
       print()
     }
     if Terminal.isTTY {
-      print(dim("Open Skillscout to turn any of these into a SKILL.md and save it."))
+      print(dim("Open Skill Cabinet to turn any of these into a SKILL.md and save it."))
     }
   }
 

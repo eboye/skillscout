@@ -7,7 +7,7 @@ final class AppStore {
   var skills: [Skill] = []
   var prompts: [Prompt] = []
   var usage: [Skill.ID: SkillUsage] = [:]
-  /// The tools you use, in `Tool.allCases` order. Skillscout ignores the others.
+  /// The tools you use, in `Tool.allCases` order. Skill Cabinet ignores the others.
   var tools: [Tool] = Tool.enabled
   var suggestions: [Suggestion] = []
   var explanations: [String: String] = [:]
