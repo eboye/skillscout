@@ -130,5 +130,5 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" packages/* --clobber
           else
-            gh release create "$TAG" packages/* --title "Skillscout $VERSION for Linux" --notes-file notes.md
+            gh release create "$TAG" packages/* --title "Skill Cabinet $VERSION for Linux" --notes-file notes.md
           fi
