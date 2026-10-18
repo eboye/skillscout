@@ -256,12 +256,22 @@ def main() -> int:
         (outside / "SKILL.md").write_text("---\nname: outside-skill\ndescription: Made outside the app.\n---\n\nHello.\n")
         check("the watcher picks up a new skill", wait(lambda: find(Atspi.Role.LABEL, name="outside-skill"), 15) is not None)
 
-        # Merge similar skills, through the fake codex
+        # Switch between two similar pairs: one Keep the name group for both used to crash the app
+        for name in ("deploy-site", "ship-site"):
+            folder = HOME / ".agents/skills" / name
+            folder.mkdir(parents=True)
+            (folder / "SKILL.md").write_text(f"---\nname: {name}\ndescription: Build the static site and deploy it to the production server with rsync.\n---\n\nRun the static site build, then rsync the output folder to the production server.\n")
         check("open Similar skills", select_row("Similar skills"))
-        pair = wait(lambda: find(Atspi.Role.LABEL, contains=" + "), 5)
+        check("the second pair shows up", wait(lambda: find(Atspi.Role.LABEL, name="deploy-site + ship-site"), 15) is not None)
+        check("select the deploy pair", select_row("deploy-site + ship-site"))
+        pair = wait(lambda: find(Atspi.Role.LABEL, contains="email-style + "), 5)
         check("a similar pair is listed", pair is not None)
         if pair is not None:
             select_row(label(pair))
+        check("switching pairs keeps the app open", wait(lambda: app.poll() is not None, 2) is None)
+        check("Keep the name shows the new pair", wait(lambda: find(name="email-style") and find(name="deploy-site") is None, 5) is True)
+
+        # Merge similar skills, through the fake codex
         check("click Merge with AI", click("Merge with AI"))
         merge = wait(lambda: find(Atspi.Role.BUTTON, contains="Merge into "), 15)
         check("the merged draft shows up", merge is not None)

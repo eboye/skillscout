@@ -122,12 +122,15 @@ struct SimilarDetail: View {
   @ViewBuilder private func mergeSection(_ plan: SkillInstaller.MergePlan?, _ problem: String?) -> Body {
     HStack(spacing: 10) {
       Text("Keep the name")
+      // A new group for each pair: swapping the names in one removes the active toggle, and
+      // Adwaita for Swift crashes reading the active name while none is set.
       ToggleGroup(
         selection: Binding { keep } set: { model.keep[pair.id] = $0 },
         values: [pair.first, pair.second],
         id: \.self,
         label: \.self
       )
+      .id(pair.id)
     }
     .halign(.start)
 
