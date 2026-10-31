@@ -13,6 +13,8 @@ The Flatpak and the AppImage bring GTK 4 and libadwaita with them. The other pac
 
 The Flatpak has your home folder, since the agents keep their skills there. It runs the Codex and Claude Code CLIs on your system, outside the sandbox, so the AI features work as they do elsewhere. Its **Install Command Line Tool** puts a `skillscout` script in `~/.local/bin` that runs the command from the Flatpak.
 
+Coming from Skill Cabinet for Linux? Skillscout is the same app under a new name and app ID, `io.github.eboye.skillscout`. The Flatpak installs next to the old one and copies your settings and data on its first start, then you can remove the old one with `flatpak uninstall com.flaviocopes.skillscout`. The other packages replace it.
+
 There's no automatic update check on Linux. Install a newer package the same way, or update the Flatpak with `flatpak update`.
 
 Check the downloads against `SHA256SUMS`.

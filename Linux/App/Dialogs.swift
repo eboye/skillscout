@@ -173,7 +173,7 @@ extension AnyView {
   }
 }
 
-let appVersion = "1.5.0"
+let appVersion = "1.6.0"
 
 struct RenameView: View {
   let store: AppStore

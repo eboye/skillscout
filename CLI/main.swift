@@ -258,7 +258,7 @@ func printHelp(_ command: Command?) {
 }
 
 var version: String {
-  Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.5.0"
+  Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.6.0"
 }
 
 @MainActor
@@ -278,6 +278,7 @@ func printCapabilities(json: Bool) throws {
       ["description": "Ask AI for skill ideas", "command": "skillscout suggest --json"]
     ],
     "changelog": [
+      ["version": "1.6.0", "date": "2026-10-31", "changes": ["Renamed to Skillscout, a fork of Skill Cabinet 1.5.0, with the app ID io.github.eboye.skillscout.", "On Linux, the command reads the settings picked in the app."]],
       ["version": "1.5.0", "date": "2026-10-08", "changes": ["Renamed the app to Skill Cabinet. The skillscout command keeps its existing name.", "New capabilities command lists tasks and release history."]],
       ["version": "1.4.0", "date": "2026-10-03", "changes": ["Signed and notarized Mac release."]],
       ["version": "1.3.0", "date": "2026-10-01", "changes": ["Filters skills by personal, plugin and built-in copies."]],
