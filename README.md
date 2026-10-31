@@ -375,8 +375,12 @@ Then it reads the chats of every agent you turned on. Each agent stores them dif
 
 An FSEvents watcher on the agents' folders refreshes the list and the counts while you work.
 
+## Credits
+
+Skillscout is built on [Skill Cabinet](https://flaviocopes.com/skill-cabinet/), which [Flavio Copes](https://flaviocopes.com) created and released under the MIT license. He wrote the Mac app, the `skillscout` command and the core they share: the agent rules, the skill scanner, the chat readers, usage counting, similar skills and the AI features. This repository forked his last public version, 1.5.0, and added the GNOME app and the Linux packages. If you're on a Mac, [buy Skill Cabinet](https://flaviocopes.com/skill-cabinet/) from him.
+
 ## License
 
-Skillscout is released under the [MIT license](LICENSE). It's provided as is, without warranty of any kind.
+Skillscout is released under the [MIT license](LICENSE), with Flavio Copes' copyright for Skill Cabinet kept in it. It's provided as is, without warranty of any kind.
 
 Skillscout is an independent project, and it isn't affiliated with the makers of the agents it works with. Cursor, Claude Code, Codex, Gemini CLI, OpenCode, Droid, Pi and Amp are trademarks of their owners.
