@@ -24,6 +24,8 @@ let standalone: [LinkerSetting] = [.unsafeFlags(["-Xlinker", "-rpath=$ORIGIN/../
 var targets: [Target] = [
   .systemLibrary(name: "CSQLite", path: "Linux/CSQLite", pkgConfig: "sqlite3", providers: [.apt(["libsqlite3-dev"])]),
   .executableTarget(name: "skillscout", dependencies: core, path: "Linux/CLI", linkerSettings: standalone),
+  // Tests for the shared core, through the command's module, against a made-up home.
+  .testTarget(name: "SkillscoutTests", dependencies: ["skillscout"], path: "Tests/SkillscoutTests"),
 ]
 
 var products: [Product] = [

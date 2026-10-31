@@ -326,7 +326,7 @@ What's different from the Mac app:
 - Settings live in `~/.config/com.flaviocopes.skillscout.plist`, which the command reads too.
 - There's no update check. Update with your package, or run the install again.
 
-For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, `Linux/scripts/ui-test-flatpak.sh` does the same inside the Flatpak, and `Linux/scripts/screenshot.sh` takes screenshots. They run on a headless GNOME display, so nothing opens on your desktop, and they never touch a Skill Cabinet you have open.
+For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `swift test` checks the shared code that finds, links, removes and renames skills, against a made-up home. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, `Linux/scripts/ui-test-flatpak.sh` does the same inside the Flatpak, and `Linux/scripts/screenshot.sh` takes screenshots. They run on a headless GNOME display, so nothing opens on your desktop, and they never touch a Skill Cabinet you have open.
 
 `Linux/packaging/package.sh deb rpm tarball appimage` builds packages into `build/packages`, and `Linux/packaging/flatpak/com.flaviocopes.skillscout.yml` is the Flatpak manifest. The `Linux packages` workflow builds them all, each on the distribution it's for, and attaches them to the release when you push a tag. Linux releases follow the Mac version, `MARKETING_VERSION` in `project.yml`, and a fork tags them `v1.5.0-linux.1`, then `v1.5.0-linux.2` for a second Linux build of the same version.
 

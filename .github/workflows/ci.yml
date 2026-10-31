@@ -37,6 +37,7 @@ jobs:
           ln -sf /usr/lib/libxml2.so.16 "$lib/libxml2.so.2"
           ln -sf /usr/lib/libedit.so.0 "$lib/libedit.so.2"
           echo "/opt/$SWIFT/usr/bin" >> "$GITHUB_PATH"
+      - run: swift test
       - run: swift build -c release
       - run: .build/release/skillscout help
       - run: PREFIX=/usr DESTDIR="$PWD/build/stage" SKIP_BUILD=1 Linux/scripts/install.sh
