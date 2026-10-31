@@ -94,7 +94,7 @@ extension AnyView {
         ],
         links: [
           .website(URL(string: "https://flaviocopes.com/skill-cabinet/")),
-          .issues(URL(string: "https://github.com/flaviocopes/skill-cabinet/issues")),
+          .issues(URL(string: "https://github.com/eboye/skillscout/issues")),
         ]
       )
       .shortcutsDialog(visible: Binding { model.showShortcuts } set: { model.showShortcuts = $0 }, id: "shortcuts")

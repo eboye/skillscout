@@ -4,10 +4,6 @@ import SwiftUI
 struct SkillscoutApp: App {
   @State private var store = AppStore()
 
-  init() {
-    AppUpdater.shared.start(repository: "flaviocopes/skill-cabinet")
-  }
-
   var body: some Scene {
     Window("Skill Cabinet", id: "main") {
       ContentView()
@@ -16,11 +12,6 @@ struct SkillscoutApp: App {
     }
     .defaultSize(width: 1180, height: 760)
     .commands {
-      CommandGroup(after: .appInfo) {
-        Button("Check for Updates…") {
-          AppUpdater.shared.checkForUpdates()
-        }
-      }
       CommandGroup(after: .appSettings) {
         Button("Install Command Line Tool…") { CommandLineTool.install() }
       }

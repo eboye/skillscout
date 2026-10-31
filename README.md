@@ -12,23 +12,15 @@ Read the announcement and watch the 1-minute demo on my blog: [I built Skill Cab
 
 ## Download
 
-Get `Skill-Cabinet-1.5.0.zip` from the [latest release](https://github.com/flaviocopes/skill-cabinet/releases/latest), unzip it, and drag Skill Cabinet to your Applications folder. It runs on macOS 15 Sequoia or later, on Apple silicon and Intel Macs.
+Skill Cabinet for the Mac is sold on [flaviocopes.com/skill-cabinet](https://flaviocopes.com/skill-cabinet/). Buying it gets you into the private repository with the app and its source. Download the zip from that repository's releases, unzip it, and drag Skill Cabinet to your Applications folder. It runs on macOS 15 Sequoia or later, on Apple silicon and Intel Macs.
+
+This repository holds the last public version, 1.5.0, and its [Linux port](#linux).
 
 ### Opening it the first time
 
 Skill Cabinet is signed with my Apple Developer ID and notarized by Apple. The first time you open it, macOS asks if you're sure you want to open an app downloaded from the internet. Click **Open**.
 
 On a work laptop you might not be able to install apps in `/Applications`. You can keep Skill Cabinet in the `Applications` folder inside your home folder instead.
-
-### Updates
-
-Once a day, Skill Cabinet asks GitHub whether there's a newer version. When there is, it shows what's new, and **Install and Relaunch** puts it in place of the old one. **Skill Cabinet → Check for Updates…** checks right away. The `skillscout` command lives inside the app, so it updates too.
-
-To turn off the daily check, run this in Terminal:
-
-```sh
-defaults write com.flaviocopes.skillscout AppUpdaterAutomaticChecks -bool false
-```
 
 ## Features
 
@@ -49,7 +41,6 @@ defaults write com.flaviocopes.skillscout AppUpdaterAutomaticChecks -bool false
 - Every copy of a skill on disk, with a warning when two copies have different content
 - The list and the counts update while you work, as skills and chats change on disk
 - A `skillscout` command for your terminal that reads the same data
-- Updates from inside the app: it checks GitHub once a day, and **Install and Relaunch** puts the new version in place
 - Light and dark appearance following the macOS setting
 
 <picture>
@@ -277,7 +268,7 @@ Run `skillscout capabilities` for tasks and release history, or add `--json` for
 
 ## Privacy
 
-Skill Cabinet reads your skill folders and your chats on your Mac, and has no accounts or analytics. The only request it makes on its own goes to GitHub: once a day, it asks whether there's a newer version of Skill Cabinet, and it downloads one only when you click **Install and Relaunch**.
+Skill Cabinet reads your skill folders and your chats on your Mac, and has no accounts or analytics. It makes no network requests of its own.
 
 Your chats leave your Mac only through the AI features. **Explain with AI**, **Find repeated tasks**, **Draft the skill with AI** and **Merge with AI** run the Codex CLI or the Claude Code CLI you're already logged in to, so the prompt goes to OpenAI or Anthropic under your own account. To find skill ideas, that prompt includes up to 2,000 of your recent messages, each cut to 220 characters, with the agent and project it came from. To merge two skills, it includes both `SKILL.md` files and the names of their other files.
 

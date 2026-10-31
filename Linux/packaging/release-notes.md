@@ -1,4 +1,4 @@
-Skill Cabinet @VERSION@ for Linux: the GNOME app and the `skillscout` command, built on the same core as [Skill Cabinet @VERSION@](https://github.com/flaviocopes/skill-cabinet/releases/tag/v@VERSION@) for the Mac.
+Skill Cabinet @VERSION@ for Linux: the GNOME app and the `skillscout` command, built on the same core as [Skill Cabinet @VERSION@](https://flaviocopes.com/skill-cabinet/) for the Mac.
 
 The Flatpak and the AppImage bring GTK 4 and libadwaita with them. The other packages need libadwaita 1.8 or later from your distribution, so GNOME 49 or a distribution as recent. They all include the Swift runtime.
 

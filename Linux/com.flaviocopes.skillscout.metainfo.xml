@@ -23,7 +23,7 @@
   </description>
   <launchable type="desktop-id">com.flaviocopes.skillscout.desktop</launchable>
   <url type="homepage">https://flaviocopes.com/skill-cabinet/</url>
-  <url type="bugtracker">https://github.com/flaviocopes/skill-cabinet/issues</url>
+  <url type="bugtracker">https://github.com/eboye/skillscout/issues</url>
   <provides>
     <binary>skillscout</binary>
     <binary>skillscout-gnome</binary>

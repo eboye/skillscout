@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		059A5D5E6CD42EB94D7CF8DA /* AppUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 365039D37C939DF6EA1C6600 /* AppUpdater.swift */; };
 		0B4298E3428DA3452C8E316E /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8B95A883374ADCF2BB2A9A5 /* AppStore.swift */; };
 		11E7DF1CFFE0D2991E331A43 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13E320FCE90C51C4EA51E9B6 /* SettingsView.swift */; };
 		2F6073BEADFE16809A96C720 /* FileWatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89D396BDA8C7A8F808C390DC /* FileWatcher.swift */; };
@@ -73,7 +72,6 @@
 		1519DD1D0C5E721A32081B3D /* Skillscout.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Skillscout.entitlements; sourceTree = "<group>"; };
 		1A5CBBA64E4A150D837018A9 /* Skillscout.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Skillscout.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1B2F1910B2F3AC4B72EA3830 /* SkillSimilarity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkillSimilarity.swift; sourceTree = "<group>"; };
-		365039D37C939DF6EA1C6600 /* AppUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppUpdater.swift; sourceTree = "<group>"; };
 		36B6744572DF35BB435E8324 /* CommandLineTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandLineTool.swift; sourceTree = "<group>"; };
 		414FE5AD94D9FE8882D117D9 /* Commands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Commands.swift; sourceTree = "<group>"; };
 		470A830374A881BA320C6298 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -115,7 +113,6 @@
 				B18AC56992256E677133D35C /* Analyzer.swift */,
 				50C6B03A08C5B5CE4FA655E2 /* AppIcon.icon */,
 				D8B95A883374ADCF2BB2A9A5 /* AppStore.swift */,
-				365039D37C939DF6EA1C6600 /* AppUpdater.swift */,
 				36B6744572DF35BB435E8324 /* CommandLineTool.swift */,
 				64E4526107B440152D6AB925 /* Components.swift */,
 				AEA41E1474F7BE423B56D346 /* ContentView.swift */,
@@ -269,7 +266,6 @@
 				87C08B6B099E31DE98657B1B /* AIEngine.swift in Sources */,
 				681E32575030D0E0B2D761D0 /* Analyzer.swift in Sources */,
 				0B4298E3428DA3452C8E316E /* AppStore.swift in Sources */,
-				059A5D5E6CD42EB94D7CF8DA /* AppUpdater.swift in Sources */,
 				B5A22C0947A1D605DD5A347F /* CommandLineTool.swift in Sources */,
 				3057845395C604BF88151C8A /* Components.swift in Sources */,
 				378AA334FB694C25962B9245 /* ContentView.swift in Sources */,
