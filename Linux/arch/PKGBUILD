@@ -1,4 +1,4 @@
-# Builds Skill Cabinet for Arch Linux from the commit this checkout has checked out:
+# Builds Skillscout for Arch Linux from the commit this checkout has checked out:
 #
 #   cd Linux/arch && makepkg -si
 #

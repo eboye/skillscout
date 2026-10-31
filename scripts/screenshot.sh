@@ -5,7 +5,7 @@
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
-APP="$ROOT/build/screenshot/Skill Cabinet Screenshot.app"
+APP="$ROOT/build/screenshot/Skillscout Screenshot.app"
 
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$ROOT/docs"
@@ -21,9 +21,9 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>CFBundleExecutable</key>
   <string>Screenshot</string>
   <key>CFBundleIdentifier</key>
-  <string>com.flaviocopes.skillscout.screenshot</string>
+  <string>io.github.eboye.skillscout.screenshot</string>
   <key>CFBundleName</key>
-  <string>Skill Cabinet</string>
+  <string>Skillscout</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>NSHighResolutionCapable</key>
@@ -35,5 +35,5 @@ PLIST
 codesign --force --sign - "$APP"
 open -n "$APP" --args "$ROOT/docs" "$ROOT/build/demo-home" -AppleLocale en_US -AppleLanguages '(en)'
 sleep 1
-while pgrep -f "Skill Cabinet Screenshot.app/Contents/MacOS" >/dev/null; do sleep 1; done
+while pgrep -f "Skillscout Screenshot.app/Contents/MacOS" >/dev/null; do sleep 1; done
 ls -la "$ROOT"/docs/screenshot*.png

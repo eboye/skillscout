@@ -10,7 +10,7 @@ struct SimilarList: View {
       StatusPage(
         "No similar skills",
         icon: .custom(name: "view-dual-symbolic"),
-        description: "Skill Cabinet compares the words your skills use. When two of them cover the same ground, they show up here, so you can merge them."
+        description: "Skillscout compares the words your skills use. When two of them cover the same ground, they show up here, so you can merge them."
       )
       .vexpand()
     } else {
@@ -98,7 +98,7 @@ struct SimilarDetail: View {
         VStack(spacing: 4) {
           Button("They're Different Skills") { store.dismissPair(pair) }
             .halign(.start)
-          paragraph("Skill Cabinet won't pair them again.").caption().dimLabel()
+          paragraph("Skillscout won't pair them again.").caption().dimLabel()
         }
       }
       .style("detail")
@@ -181,7 +181,7 @@ private struct SkillCard: View {
       if let usage = store.usage[skill.id] {
         paragraph("Used in \(plural(usage.chats, "chat"))").caption().dimLabel()
       } else {
-        paragraph("Not used in the last \(UserDefaults.standard.integer(forKey: "lookbackDays")) days").caption().dimLabel()
+        paragraph("Not used in the last \(UserDefaults.app.integer(forKey: "lookbackDays")) days").caption().dimLabel()
       }
       Button("Open SKILL.md") { Desktop.open(skill.skillFile) }
         .flat()

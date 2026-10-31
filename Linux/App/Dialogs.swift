@@ -83,17 +83,19 @@ extension AnyView {
       .preferences(store: store, model: model)
       .aboutDialog(
         visible: Binding { model.showAbout } set: { model.showAbout = $0 },
-        app: "Skill Cabinet",
-        developer: "Flavio Copes",
+        app: "Skillscout",
+        developer: "eboye",
         version: appVersion,
-        icon: .custom(name: "com.flaviocopes.skillscout"),
+        icon: .custom(name: "io.github.eboye.skillscout"),
         details: [
           .comment("Find the skills your coding agents load, see which agents can use each one, and count how often you use them."),
-          .developers(["Flavio Copes https://flaviocopes.com"]),
+          .developers(["eboye https://github.com/eboye"]),
+          .creditSection(["Flavio Copes https://flaviocopes.com/skill-cabinet/"], label: "Based on Skill Cabinet by"),
+          .copyright("© 2026 Flavio Copes, eboye"),
           .licenseType(.mitX11),
         ],
         links: [
-          .website(URL(string: "https://flaviocopes.com/skill-cabinet/")),
+          .website(URL(string: "https://github.com/eboye/skillscout")),
           .issues(URL(string: "https://github.com/eboye/skillscout/issues")),
         ]
       )
@@ -112,7 +114,7 @@ extension AnyView {
   }
 
   private func preferences(store: AppStore, model: WindowModel) -> AnyView {
-    let defaults = UserDefaults.standard
+    let defaults = UserDefaults.app
     _ = model.settingsRevision
     func setting<Value>(_ key: String, _ read: @escaping () -> Value, _ write: @escaping (Value) -> Void) -> Binding<Value> {
       Binding(get: read, set: { value in
@@ -125,13 +127,13 @@ extension AnyView {
     return preferencesDialog(visible: Binding { model.showPreferences } set: { model.showPreferences = $0 }, id: "preferences")
       .preferencesPage("General", icon: .custom(name: "preferences-system-symbolic")) { page in
         page
-          .group("Tools", description: "Skill Cabinet shows the skills these tools load, and reads their chats for usage and repeated tasks.") {
+          .group("Tools", description: "Skillscout shows the skills these tools load, and reads their chats for usage and repeated tasks.") {
             Tool.allCases.map { tool -> AnyView in
               SwitchRow(tool.name, isOn: Binding { store.tools.contains(tool) } set: { store.setTool(tool, enabled: $0) })
                 .subtitle(tool.isInstalled ? "" : "Not found on this computer")
             }
           }
-          .group("AI", description: "Skill Cabinet runs the CLI you're already logged in to. These runs aren't saved to your chat history.") {
+          .group("AI", description: "Skillscout runs the CLI you're already logged in to. These runs aren't saved to your chat history.") {
             ComboRow(
               "Engine",
               selection: setting("engine", { engine.rawValue }, { defaults.set($0, forKey: "engine") }),
@@ -190,7 +192,7 @@ struct RenameView: View {
     var what: [String] = []
     if folders > 0 { what.append(folders == 1 ? "its folder" : "its \(folders) folders") }
     if links > 0 { what.append(links == 1 ? "the link to it" : "the \(links) links to it") }
-    var sentences = ["Skill Cabinet renames \(list(what)), and changes the name in SKILL.md."]
+    var sentences = ["Skillscout renames \(list(what)), and changes the name in SKILL.md."]
 
     let targets = skill.linkTargetsKept(skill.removableCopies)
     if !targets.isEmpty {
@@ -242,7 +244,7 @@ struct EditView: View {
 
   private var note: String {
     guard let edit = model.edit else { return "" }
-    var sentences = ["Skill Cabinet saves it to \(list(edit.files.map(Paths.abbreviate)))."]
+    var sentences = ["Skillscout saves it to \(list(edit.files.map(Paths.abbreviate)))."]
     if !edit.otherFiles.isEmpty {
       let one = edit.otherFiles.count == 1
       sentences.append("\(list(edit.otherFiles.map(Paths.abbreviate))) \(one ? "has" : "have") other text, so \(one ? "it stays as it is" : "they stay as they are").")

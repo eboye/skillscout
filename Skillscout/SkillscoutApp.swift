@@ -2,10 +2,16 @@ import SwiftUI
 
 @main
 struct SkillscoutApp: App {
-  @State private var store = AppStore()
+  @State private var store: AppStore
+
+  init() {
+    // Before the store reads the settings.
+    AppID.adoptFormerData()
+    _store = State(initialValue: AppStore())
+  }
 
   var body: some Scene {
-    Window("Skill Cabinet", id: "main") {
+    Window("Skillscout", id: "main") {
       ContentView()
         .environment(store)
         .task { await store.start() }

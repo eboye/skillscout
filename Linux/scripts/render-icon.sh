@@ -38,6 +38,6 @@ magick -size "${size}x${size}" xc:none "$work/tile.png" -gravity center -composi
 mkdir -p "$out"
 for px in 512 256 128 64 48 32 16; do
   mkdir -p "$out/${px}x${px}"
-  magick "$work/icon.png" -resize "${px}x${px}" "$out/${px}x${px}/com.flaviocopes.skillscout.png"
+  magick "$work/icon.png" -resize "${px}x${px}" "$out/${px}x${px}/io.github.eboye.skillscout.png"
 done
 echo "$out"

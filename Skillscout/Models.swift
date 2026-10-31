@@ -36,6 +36,69 @@ enum Paths {
   static let stateFile = appSupport.appending(path: "state.json")
 }
 
+/// Skillscout is a fork of Skill Cabinet, which ran under the ID com.flaviocopes.skillscout. The
+/// first start under the new ID copies over what the app kept under the old one.
+enum AppID {
+  static let current = "io.github.eboye.skillscout"
+  static let former = "com.flaviocopes.skillscout"
+
+  /// Copies the settings, and in the Flatpak the app's data, from the former ID. Call it before
+  /// anything reads `UserDefaults` or `Paths.appSupport`. It never writes over what's already there.
+  static func adoptFormerData() {
+    #if os(Linux)
+    let fm = FileManager.default
+    let environment = ProcessInfo.processInfo.environment
+    let configHome = environment["XDG_CONFIG_HOME"].flatMap { $0.hasPrefix("/") ? URL(fileURLWithPath: $0) : nil } ?? Paths.at(".config")
+    let formerSandbox = Paths.at(".var/app/\(former)")
+
+    // `UserDefaults.app` keeps the settings in $XDG_CONFIG_HOME/<ID>.plist: ~/.config outside the
+    // Flatpak, the app's own folder in ~/.var/app inside it. Before, the GNOME app wrote them to
+    // skillscout-gnome.plist, named after its executable.
+    let settings = configHome.appending(path: "\(current).plist")
+    let formerSettings = [configHome, formerSandbox.appending(path: "config")].flatMap { folder in
+      ["skillscout-gnome.plist", "\(former).plist"].map { folder.appending(path: $0) }
+    }
+    if !fm.fileExists(atPath: settings.path), let old = formerSettings.first(where: { fm.fileExists(atPath: $0.path) }) {
+      try? fm.createDirectory(at: configHome, withIntermediateDirectories: true)
+      try? fm.copyItem(at: old, to: settings)
+    }
+
+    // Outside the Flatpak, the data folder, ~/.local/share/skillscout, doesn't depend on the ID.
+    // Inside, every ID has a folder of its own, and the manifest lets the app read the former one.
+    guard environment["FLATPAK_ID"] != nil else { return }
+    let data = Paths.appSupport
+    let formerData = formerSandbox.appending(path: "data/skillscout")
+    if ((try? fm.contentsOfDirectory(atPath: data.path)) ?? []).isEmpty, let entries = try? fm.contentsOfDirectory(atPath: formerData.path) {
+      for entry in entries {
+        try? fm.copyItem(at: formerData.appending(path: entry), to: data.appending(path: entry))
+      }
+    }
+    // Install Command Line Tool wrote a script that runs the former Flatpak.
+    let wrapper = Paths.at(".local/bin/skillscout")
+    if let script = try? String(contentsOf: wrapper, encoding: .utf8), script.contains("flatpak run --command=skillscout \(former) ") {
+      try? script.replacingOccurrences(of: former, with: current).write(to: wrapper, atomically: true, encoding: .utf8)
+      try? fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: wrapper.path)
+    }
+    #else
+    let defaults = UserDefaults.standard
+    if defaults.persistentDomain(forName: current) == nil, let old = defaults.persistentDomain(forName: former) {
+      defaults.setPersistentDomain(old, forName: current)
+    }
+    #endif
+  }
+}
+
+extension UserDefaults {
+  /// The app's settings, which the command reads too. On the Mac, that's the app's own domain. On
+  /// Linux, `standard` is named after the executable, so the GNOME app and the command would each
+  /// get their own. Both use the file named after the app's ID instead.
+  #if os(Linux)
+  nonisolated(unsafe) static let app = UserDefaults(suiteName: AppID.current) ?? .standard
+  #else
+  static var app: UserDefaults { .standard }
+  #endif
+}
+
 func shortHash(_ string: String) -> String {
   SHA256.hash(data: Data(string.utf8)).prefix(8).map { String(format: "%02x", $0) }.joined()
 }
@@ -96,7 +159,7 @@ enum Tool: String, CaseIterable, Codable, Identifiable, Sendable {
 
   /// The tools picked in Settings, or the installed ones until you pick.
   static var enabled: [Tool] {
-    UserDefaults.standard.stringArray(forKey: "tools")?.compactMap(Tool.init(rawValue:)) ?? installed
+    UserDefaults.app.stringArray(forKey: "tools")?.compactMap(Tool.init(rawValue:)) ?? installed
   }
 }
 

@@ -8,7 +8,7 @@ import Glibc
 final class FileWatcher: @unchecked Sendable {
   private let handler: @Sendable ([String]) -> Void
   private let latency: TimeInterval
-  private let queue = DispatchQueue(label: "com.flaviocopes.skillscout.watcher")
+  private let queue = DispatchQueue(label: "io.github.eboye.skillscout.watcher")
   private let descriptor: Int32
   private var source: DispatchSourceRead?
   private var folders: [Int32: String] = [:]

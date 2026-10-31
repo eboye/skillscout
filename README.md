@@ -1,26 +1,18 @@
-<img src="docs/banner.png" alt="Skill Cabinet, your agent skills in one place, and the ones you keep asking for" />
+# Skillscout
 
-Skill Cabinet is a Mac app for the skills your coding agents load. It finds every skill on your Mac, shows which agents can see each one, and counts how often you use them.
+Skillscout is a GNOME app and a `skillscout` command for the skills your coding agents load. It finds every skill in your home folder, shows which agents can see each one, and counts how often you use them.
 
-It knows 8 agents: Cursor, Claude Code, Codex, Gemini CLI, OpenCode, Droid, Pi and Amp. Each one reads skills from its own folders, and some also read the folders of the others. So a skill you wrote for Claude Code can load in Cursor but not in Codex. Skill Cabinet maps all of it, and adds a skill to the agents that miss it with one click.
+It knows 8 agents: Cursor, Claude Code, Codex, Gemini CLI, OpenCode, Droid, Pi and Amp. Each one reads skills from its own folders, and some also read the folders of the others. So a skill you wrote for Claude Code can load in Cursor but not in Codex. Skillscout maps all of it, and adds a skill to the agents that miss it with one click.
 
 It also reads your chats. It counts a use every time an agent loads a skill, and it looks for requests you keep typing, so you can turn them into new skills.
 
-Read the announcement and watch the 1-minute demo on my blog: [I built Skill Cabinet, a Mac app for the skills your coding agents load](https://flaviocopes.com/skill-cabinet/).
-
-[![Watch the 1-minute Skill Cabinet demo](docs/showreel-poster.jpg)](https://flaviocopes.com/skill-cabinet/)
+Skillscout is a fork of [Skill Cabinet](https://flaviocopes.com/skill-cabinet/) by Flavio Copes, from its last public version, 1.5.0, under the MIT license. Skill Cabinet is a Mac app, and Flavio sells it on his site. This repository started as its Linux port, and carries on from there. The Mac app's code is still here and builds from source, but this repository makes no Mac releases.
 
 ## Download
 
-Skill Cabinet for the Mac is sold on [flaviocopes.com/skill-cabinet](https://flaviocopes.com/skill-cabinet/). Buying it gets you into the private repository with the app and its source. Download the zip from that repository's releases, unzip it, and drag Skill Cabinet to your Applications folder. It runs on macOS 15 Sequoia or later, on Apple silicon and Intel Macs.
+Get a package for your distribution from the [releases](https://github.com/eboye/skillscout/releases). See [Linux](#linux) for which one to pick.
 
-This repository holds the last public version, 1.5.0, and its [Linux port](#linux).
-
-### Opening it the first time
-
-Skill Cabinet is signed with my Apple Developer ID and notarized by Apple. The first time you open it, macOS asks if you're sure you want to open an app downloaded from the internet. Click **Open**.
-
-On a work laptop you might not be able to install apps in `/Applications`. You can keep Skill Cabinet in the `Applications` folder inside your home folder instead.
+Skillscout used to be called Skill Cabinet, with the app ID `com.flaviocopes.skillscout`. Its app ID is `io.github.eboye.skillscout` now, so the Flatpak installs next to the old one: the first start copies your settings and data over, and then you can remove the old one with `flatpak uninstall com.flaviocopes.skillscout`.
 
 ## Features
 
@@ -34,18 +26,18 @@ On a work laptop you might not be able to install apps in `/Applications`. You c
 - **Unused** lists the skills no chat touched in the last 60 days
 - Usage for each skill: how many chats, from which agents, in which projects, and when you last used it
 - The skills you created last come first, and you can sort by name or by use instead
-- Search by name or description with `⌘F`
+- Search by name or description with `Ctrl+F` (`⌘F` on the Mac)
 - **Explain with AI** asks Claude Code or Codex what a skill does, when the agent uses it, and what it needs to work
 - **Suggestions** finds the tasks you keep asking for and drafts a `SKILL.md` for each one
 - Plugin and built-in skills from Cursor, Claude Code and Codex, with a filter in the toolbar to show your skills, the plugin ones, the built-in ones, or all of them
 - Every copy of a skill on disk, with a warning when two copies have different content
 - The list and the counts update while you work, as skills and chats change on disk
 - A `skillscout` command for your terminal that reads the same data
-- Light and dark appearance following the macOS setting
+- Light and dark appearance following your system setting
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dark.png" />
-  <img src="docs/screenshot-light.png" alt="The Skill Cabinet window with the writing-style skill selected, showing the agents that load it and its usage" />
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-linux-dark.png" />
+  <img src="docs/screenshot-linux-light.png" alt="The Skillscout window with the code-review skill selected, showing the agents that load it and its usage" />
 </picture>
 
 ## The agents it knows
@@ -65,11 +57,11 @@ Every agent has its own skills folder, and its own place for chats:
 
 Some folders are read by more than one agent. `~/.agents/skills` is a shared folder that Cursor, Codex, Gemini CLI, OpenCode, Droid and Pi all load. Cursor and OpenCode also load `~/.claude/skills`, and Cursor loads `~/.codex/skills` too. Claude Code and Amp only read their own folders.
 
-Skill Cabinet knows these rules, so for every skill it tells you which agents load it and from which folder.
+Skillscout knows these rules, so for every skill it tells you which agents load it and from which folder.
 
 It lists your own skills first. Pick **Plugin skills**, **Built-in skills** or **All skills** in the toolbar to see the plugin skills from `~/.cursor/plugins`, `~/.claude/plugins/cache` and `~/.codex/plugins/cache`, and the built-in skills of Cursor and Codex.
 
-Skill Cabinet turns on the agents it finds on your Mac. You can turn any of them off in Settings, and Skill Cabinet stops showing its skills and reading its chats.
+Skillscout turns on the agents it finds in your home folder. You can turn any of them off in Settings, and Skillscout stops showing its skills and reading its chats.
 
 ## Adding a skill to more agents
 
@@ -81,11 +73,11 @@ Plugin skills get copied instead of linked, because a plugin update replaces its
 
 ## Removing a skill
 
-Select a skill and click the Trash button in the toolbar, or **Uninstall this skill** under **Where it lives**. You can also right-click it in the list, or press Delete. Skill Cabinet moves every copy in your skills folders to the Trash, links included, so you can put it back from there.
+Select a skill and click the Trash button in the toolbar, or **Uninstall this skill** under **Where it lives**. You can also right-click it in the list, or press Delete. Skillscout moves every copy in your skills folders to the Trash, links included, so you can put it back from there.
 
 To take a skill away from some agents only, click **Remove** next to one of its folders. If other folders link to that one, the links go too, since they'd point to nothing. When you remove a link, the folder it points to stays.
 
-Before anything moves, Skill Cabinet tells you which agents will stop loading the skill.
+Before anything moves, Skillscout tells you which agents will stop loading the skill.
 
 Plugin and built-in skills stay where they are. Their agents manage them, so uninstall the plugin to remove its skills.
 
@@ -93,7 +85,7 @@ Plugin and built-in skills stay where they are. Their agents manage them, so uni
 
 Select a skill and click the edit button in the toolbar, or **Edit** above its `SKILL.md`. The editor keeps your quotes straight and your `--` as two hyphens, so the commands in a skill still run.
 
-Skill Cabinet saves the text to every copy of the skill that had the same text. A copy with different text stays as it is, and so does a plugin copy. If an agent changes the `SKILL.md` while you're editing it, Skill Cabinet tells you before it saves over that change.
+Skillscout saves the text to every copy of the skill that had the same text. A copy with different text stays as it is, and so does a plugin copy. If an agent changes the `SKILL.md` while you're editing it, Skillscout tells you before it saves over that change.
 
 The name in the frontmatter stays as it is, since a new name also means new folders. Use **Rename** for that. **Open in editor** opens the file in your usual Markdown editor instead.
 
@@ -101,7 +93,7 @@ The name in the frontmatter stays as it is, since a new name also means new fold
 
 Select a skill and click the rename button in the toolbar, or **Rename…** under **Where it lives**. Names use lowercase letters, numbers and hyphens, like `release-notes`.
 
-Skill Cabinet renames the skill's folders in your skills folders, creates its links again under the new name, and changes the `name` in its `SKILL.md`. A folder outside your skills folders, like a repo of skills your links point to, keeps its folder name. A plugin copy keeps the old name too.
+Skillscout renames the skill's folders in your skills folders, creates its links again under the new name, and changes the `name` in its `SKILL.md`. A folder outside your skills folders, like a repo of skills your links point to, keeps its folder name. A plugin copy keeps the old name too.
 
 Chats that used the old name keep counting for the skill.
 
@@ -109,9 +101,9 @@ Chats that used the old name keep counting for the skill.
 
 After a while, you end up with two skills that do almost the same job. **Similar skills** in the sidebar lists the pairs that read alike, and the words they share.
 
-Skill Cabinet compares the words in each skill's name, description and `SKILL.md`, and rare words count more than common ones. It runs on your Mac, without AI, and it only pairs your own skills, not plugin or built-in ones.
+Skillscout compares the words in each skill's name, description and `SKILL.md`, and rare words count more than common ones. It runs on your computer, without AI, and it only pairs your own skills, not plugin or built-in ones.
 
-Pick a pair to see the two skills side by side. Choose the name to keep and click **Merge with AI**. Claude Code or Codex writes one `SKILL.md` from both, and you can edit it before anything changes. When you click **Merge into**, Skill Cabinet:
+Pick a pair to see the two skills side by side. Choose the name to keep and click **Merge with AI**. Claude Code or Codex writes one `SKILL.md` from both, and you can edit it before anything changes. When you click **Merge into**, Skillscout:
 
 - writes the new `SKILL.md` into the kept skill's folder, and moves the old one to the Trash
 - copies over the other skill's extra files, like templates and references, unless the kept skill has one at the same path
@@ -120,13 +112,13 @@ Pick a pair to see the two skills side by side. Choose the name to keep and clic
 
 Chats that used the other skill count for the kept one from then on.
 
-If two skills look alike but do different jobs, click **They're different skills**, and Skill Cabinet won't pair them again.
+If two skills look alike but do different jobs, click **They're different skills**, and Skillscout won't pair them again.
 
 ## Counting uses
 
 A use is a chat where the agent read the skill, or where you attached it yourself.
 
-Skill Cabinet looks for the moment an agent opens a skill's `SKILL.md`. That can be a skill tool call, a file read, or a shell command that prints the file. It also counts the skills you attach in Cursor and the slash commands you run in Claude Code. A chat counts once per skill, however many times the agent reads it.
+Skillscout looks for the moment an agent opens a skill's `SKILL.md`. That can be a skill tool call, a file read, or a shell command that prints the file. It also counts the skills you attach in Cursor and the slash commands you run in Claude Code. A chat counts once per skill, however many times the agent reads it.
 
 It reads the last 60 days of chats. You can change that to 30, 90 or 180 days in Settings.
 
@@ -134,20 +126,20 @@ It reads the last 60 days of chats. You can change that to 30, 90 or 180 days in
 
 Some requests you type again and again, like "check the links before deploying" or "bump the version and tag it". Each one could be a skill.
 
-Click **Find repeated tasks** in the toolbar and Skill Cabinet sends your 2,000 most recent messages to Claude Code or Codex. It asks for requests you keep making that a skill could handle, and skips the ones your skills already cover. Each idea shows how many times you asked, in which projects, and the messages that match.
+Click **Find repeated tasks** in the toolbar and Skillscout sends your 2,000 most recent messages to Claude Code or Codex. It asks for requests you keep making that a skill could handle, and skips the ones your skills already cover. Each idea shows how many times you asked, in which projects, and the messages that match.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-suggestions-dark.png" />
-  <img src="docs/screenshot-suggestions-light.png" alt="The Suggestions view with a drafted SKILL.md for writing pull request descriptions" />
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-suggestions-linux-dark.png" />
+  <img src="docs/screenshot-suggestions-linux-light.png" alt="The Suggestions view with a drafted SKILL.md for writing pull request descriptions" />
 </picture>
 
 Click **Draft the skill with AI** to get a `SKILL.md` you can edit right there. **Save to all tools** writes it to `~/.agents/skills` and links it into `~/.claude/skills` and `~/.config/agents/skills`, so all 8 agents load it. The menu next to it saves the skill for a single agent. **Dismiss this idea** hides it, and later runs won't suggest it again.
 
-After your first run, Skill Cabinet analyzes again on its own once you've sent 40 new messages, at most every 30 minutes. You can change the number, or turn it off, in Settings.
+After your first run, Skillscout analyzes again on its own once you've sent 40 new messages, at most every 30 minutes. You can change the number, or turn it off, in Settings.
 
 ## The command line tool
 
-Skill Cabinet comes with a `skillscout` command. To install it, open the Skill Cabinet menu and choose **Install Command Line Tool…**. It links the command inside the app into `/usr/local/bin`, and asks for your password if that folder needs it.
+Skillscout comes with a `skillscout` command. The Linux packages install it, and so does **Install Command Line Tool** in the app's main menu, see [Linux](#linux). In the Mac app, open the Skillscout menu and choose **Install Command Line Tool…**. It links the command inside the app into `/usr/local/bin`, and asks for your password if that folder needs it.
 
 The command reads the same skills and chats as the app, and follows its settings, like which agents are on and how many days of chats to read.
 
@@ -156,7 +148,7 @@ The command reads the same skills and chats as the app, and follows its settings
 | `skillscout list` | Lists your skills and the agents that load them |
 | `skillscout show <skill>` | Where a skill lives, which agents see it, and its usage |
 | `skillscout usage` | Ranks skills by how many chats used them |
-| `skillscout tools` | The agents Skill Cabinet knows, and where each one keeps its skills |
+| `skillscout tools` | The agents Skillscout knows, and where each one keeps its skills |
 | `skillscout similar` | Lists the pairs of skills that read alike |
 | `skillscout add <skill> --to <tool>` | Adds a skill to another agent |
 | `skillscout rename <skill> <new-name>` | Gives a skill a new name |
@@ -258,7 +250,7 @@ skillscout merge writing-style email-style --dry-run
 
 `suggest`, `explain` and `merge` take `--engine codex` or `--engine claude`, and `--model` to pick the model. `explain` returns the app's saved explanation when there is one, and `--fresh` asks again.
 
-Most commands take `--json`, so you can use Skill Cabinet from scripts:
+Most commands take `--json`, so you can use Skillscout from scripts:
 
 ```sh
 skillscout list --unused --json
@@ -268,24 +260,19 @@ Run `skillscout capabilities` for tasks and release history, or add `--json` for
 
 ## Privacy
 
-Skill Cabinet reads your skill folders and your chats on your Mac, and has no accounts or analytics. It makes no network requests of its own.
+Skillscout reads your skill folders and your chats on your computer, and has no accounts or analytics. It makes no network requests of its own.
 
-Your chats leave your Mac only through the AI features. **Explain with AI**, **Find repeated tasks**, **Draft the skill with AI** and **Merge with AI** run the Codex CLI or the Claude Code CLI you're already logged in to, so the prompt goes to OpenAI or Anthropic under your own account. To find skill ideas, that prompt includes up to 2,000 of your recent messages, each cut to 220 characters, with the agent and project it came from. To merge two skills, it includes both `SKILL.md` files and the names of their other files.
+Your chats leave your computer only through the AI features. **Explain with AI**, **Find repeated tasks**, **Draft the skill with AI** and **Merge with AI** run the Codex CLI or the Claude Code CLI you're already logged in to, so the prompt goes to OpenAI or Anthropic under your own account. To find skill ideas, that prompt includes up to 2,000 of your recent messages, each cut to 220 characters, with the agent and project it came from. To merge two skills, it includes both `SKILL.md` files and the names of their other files.
 
-Skill Cabinet runs Codex with `--ephemeral` in a read-only sandbox, and Claude Code with `--no-session-persistence` and no tools. These runs don't show up in your chat history.
+Skillscout runs Codex with `--ephemeral` in a read-only sandbox, and Claude Code with `--no-session-persistence` and no tools. These runs don't show up in your chat history.
 
-Skill Cabinet keeps its own data in `~/Library/Application Support/Skillscout`. There's a cache of the chats it parsed, and the explanations, ideas and drafts it saved. It also remembers the old names of the skills you renamed or merged, so their chats keep counting.
+Skillscout keeps its own data in `~/Library/Application Support/Skillscout`. There's a cache of the chats it parsed, and the explanations, ideas and drafts it saved. It also remembers the old names of the skills you renamed or merged, so their chats keep counting.
 
 On Linux, that data lives in `~/.local/share/skillscout`, and the app makes no requests of its own: there's no update check.
 
 ## Linux
 
-Skill Cabinet also runs on Linux, as a GNOME app and the same `skillscout` command. The app is built with [Adwaita for Swift](https://codeberg.org/aparoksha/adwaita-swift), on the same core as the Mac app, so it finds the same skills, reads the same chats, and makes the same changes. The agents keep their folders in the same places on Linux.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-linux-dark.png" />
-  <img src="docs/screenshot-linux-light.png" alt="The Skill Cabinet GNOME app with the code-review skill selected" />
-</picture>
+The GNOME app is built with [Adwaita for Swift](https://codeberg.org/aparoksha/adwaita-swift), on the same core as the Mac app, so it finds the same skills, reads the same chats, and makes the same changes. The agents keep their folders in the same places on Linux.
 
 Each release has packages for Linux:
 
@@ -317,18 +304,18 @@ On other distributions, install your distribution's GTK 4, libadwaita and SQLite
 Linux/scripts/install.sh
 ```
 
-It installs the app and the command into `~/.local`, with the Swift runtime they need in `~/.local/lib/skillscout`, so they run without a Swift toolchain. Skill Cabinet shows up in your app grid. `PREFIX=/usr` installs it for every user.
+It installs the app and the command into `~/.local`, with the Swift runtime they need in `~/.local/lib/skillscout`, so they run without a Swift toolchain. Skillscout shows up in your app grid. `PREFIX=/usr` installs it for every user.
 
 What's different from the Mac app:
 
 - Removed skills go to the Trash that GNOME Files and KDE's Dolphin show, so **Restore** puts them back.
 - **Install Command Line Tool** in the main menu links `skillscout` into `~/.local/bin`, without a password. The package puts it in `/usr/bin`.
-- Settings live in `~/.config/com.flaviocopes.skillscout.plist`, which the command reads too.
+- Settings live in `~/.config/io.github.eboye.skillscout.plist`, which the command reads too. In the Flatpak, they live in `~/.var/app/io.github.eboye.skillscout/config`.
 - There's no update check. Update with your package, or run the install again.
 
-For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `swift test` checks the shared code that finds, links, removes and renames skills, against a made-up home. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, `Linux/scripts/ui-test-flatpak.sh` does the same inside the Flatpak, and `Linux/scripts/screenshot.sh` takes screenshots. They run on a headless GNOME display, so nothing opens on your desktop, and they never touch a Skill Cabinet you have open.
+For development, `swift build` builds both, and `swift run skillscout-gnome` opens the app. `swift test` checks the shared code that finds, links, removes and renames skills, against a made-up home. `Linux/scripts/ui-test.sh` clicks through the app against a made-up home and checks what each action changes on disk, `Linux/scripts/ui-test-flatpak.sh` does the same inside the Flatpak, and `Linux/scripts/screenshot.sh` takes screenshots. They run on a headless GNOME display, so nothing opens on your desktop, and they never touch a Skillscout you have open.
 
-`Linux/packaging/package.sh deb rpm tarball appimage` builds packages into `build/packages`, and `Linux/packaging/flatpak/com.flaviocopes.skillscout.yml` is the Flatpak manifest. The `Linux packages` workflow builds them all, each on the distribution it's for, and attaches them to the release when you push a tag. Linux releases follow the Mac version, `MARKETING_VERSION` in `project.yml`, and a fork tags them `v1.5.0-linux.1`, then `v1.5.0-linux.2` for a second Linux build of the same version.
+`Linux/packaging/package.sh deb rpm tarball appimage` builds packages into `build/packages`, and `Linux/packaging/flatpak/io.github.eboye.skillscout.yml` is the Flatpak manifest. The `Linux packages` workflow builds them all, each on the distribution it's for, and attaches them to the release when you push a tag. The version is `MARKETING_VERSION` in `project.yml`, and releases are tagged like `v1.6.0-linux.1`, then `v1.6.0-linux.2` for a second Linux build of the same version.
 
 ## Build it from source
 
@@ -340,9 +327,9 @@ Open `Skillscout.xcodeproj` and press `⌘R`. To build the release zip from the 
 scripts/build-release.sh
 ```
 
-It builds a universal app in `build/release/Release/Skill Cabinet.app` and zips it into `dist/`. With my Developer ID certificate in the keychain it signs and notarizes the app. Everywhere else it signs it ad hoc, so your copy is signed ad hoc. A copy you build yourself opens without a warning on your Mac.
+It builds a universal app in `build/release/Release/Skillscout.app` and zips it into `dist/`. With Flavio's Developer ID certificate in the keychain it would sign and notarize the app. Everywhere else it signs it ad hoc, so your copy is signed ad hoc. A copy you build yourself opens without a warning on your Mac.
 
-If you send it to another Mac, macOS says it "could not verify Skill Cabinet is free of malware". Click **Done**, then go to **System Settings → Privacy & Security** and click **Open Anyway**.
+If you send it to another Mac, macOS says it "could not verify Skillscout is free of malware". Click **Done**, then go to **System Settings → Privacy & Security** and click **Open Anyway**.
 
 The `skillscout` command is its own target, `SkillscoutCLI`, and the app embeds it in `Contents/Helpers`. To build only the command:
 
@@ -382,14 +369,14 @@ Working with an AI coding agent? Point it at [AGENTS.md](AGENTS.md). It has the 
 
 ## How it works
 
-At launch Skill Cabinet scans every skills folder it knows. A skill is a folder with a `SKILL.md` file, and the name and description come from its frontmatter. When the same skill shows up in more than one folder, through a link or a copy, Skill Cabinet groups the copies under one name and follows each agent's rules to work out which agents load it.
+At launch Skillscout scans every skills folder it knows. A skill is a folder with a `SKILL.md` file, and the name and description come from its frontmatter. When the same skill shows up in more than one folder, through a link or a copy, Skillscout groups the copies under one name and follows each agent's rules to work out which agents load it.
 
-Then it reads the chats of every agent you turned on. Each agent stores them differently. Cursor, Claude Code, Codex, Droid and Pi write JSONL files, Gemini CLI and Amp write JSON, and OpenCode keeps a SQLite database. Skill Cabinet keeps the messages you typed and the moments an agent loaded a skill, and caches what it parsed. On the next launch it only reads the files whose size or date changed.
+Then it reads the chats of every agent you turned on. Each agent stores them differently. Cursor, Claude Code, Codex, Droid and Pi write JSONL files, Gemini CLI and Amp write JSON, and OpenCode keeps a SQLite database. Skillscout keeps the messages you typed and the moments an agent loaded a skill, and caches what it parsed. On the next launch it only reads the files whose size or date changed.
 
 An FSEvents watcher on the agents' folders refreshes the list and the counts while you work.
 
 ## License
 
-Skill Cabinet is released under the [MIT license](LICENSE). It's provided as is, without warranty of any kind.
+Skillscout is released under the [MIT license](LICENSE). It's provided as is, without warranty of any kind.
 
-Skill Cabinet is an independent project, and it isn't affiliated with the makers of the agents it works with. Cursor, Claude Code, Codex, Gemini CLI, OpenCode, Droid, Pi and Amp are trademarks of their owners.
+Skillscout is an independent project, and it isn't affiliated with the makers of the agents it works with. Cursor, Claude Code, Codex, Gemini CLI, OpenCode, Droid, Pi and Amp are trademarks of their owners.

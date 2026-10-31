@@ -9,6 +9,7 @@ headless mutter for it.
 """
 import json
 import os
+import plistlib
 import shlex
 import subprocess
 import sys
@@ -85,7 +86,7 @@ def descendants(pid: int) -> set[int]:
     return found
 
 
-NAMES = ("skillscout-gnome", "Skill Cabinet", "Skillscout", "com.flaviocopes.skillscout")
+NAMES = ("skillscout-gnome", "Skillscout", "io.github.eboye.skillscout")
 ALREADY_OPEN: set[int] = set()
 
 
@@ -101,7 +102,7 @@ def skillscout_apps():
 
 
 def app_root():
-    """The app this test started, never a Skill Cabinet you have open with your real skills: one
+    """The app this test started, never a Skillscout you have open with your real skills: one
     whose process this test launched, or, for a Flatpak, whose accessibility proxy reports another
     process, one that wasn't on the bus before the test."""
     ours = descendants(next(iter(LAUNCHED))) if LAUNCHED else set()
@@ -191,13 +192,20 @@ def main() -> int:
         env = dict(os.environ)
     else:
         env = {k: v for k, v in os.environ.items() if k not in ("XDG_DATA_HOME", "XDG_CONFIG_HOME", "DISPLAY")}
-        # SKILLSCOUT_TEST keeps this run from handing over to a Skill Cabinet that's already open.
+        # SKILLSCOUT_TEST keeps this run from handing over to a Skillscout that's already open.
         env.update(HOME=str(HOME), SHELL="/bin/bash", SKILLSCOUT_TEST="1")
+        # Settings as the app kept them before it was Skillscout: named after its executable.
+        (HOME / ".config").mkdir(parents=True, exist_ok=True)
+        (HOME / ".config/skillscout-gnome.plist").write_bytes(plistlib.dumps({"lookbackDays": 30}))
     ALREADY_OPEN.update(pid for _, pid in skillscout_apps())
     app = subprocess.Popen(APP, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     LAUNCHED.add(app.pid)
     try:
         check("app shows up on the accessibility bus", wait(lambda: find(Atspi.Role.LABEL, name="release-notes"), 20) is not None)
+        if "SKILLSCOUT_APP" not in os.environ:
+            settings = HOME / ".config/io.github.eboye.skillscout.plist"
+            check("the former settings move to the app ID", settings.exists(), str(settings))
+            check("the app reads the moved settings", wait(lambda: find(contains="in the last 30 days"), 5) is not None)
 
         # Add to another agent
         check("select writing-style", select_row("writing-style"))

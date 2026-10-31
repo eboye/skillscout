@@ -63,7 +63,7 @@ struct SkillDetail: View {
   let store: AppStore
   let skill: Skill
 
-  private var lookbackDays: Int { UserDefaults.standard.integer(forKey: "lookbackDays") }
+  private var lookbackDays: Int { UserDefaults.app.integer(forKey: "lookbackDays") }
 
   var view: Body {
     ScrollView {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds Skill Cabinet for Linux and installs it: the GNOME app, the skillscout command, the Swift
+# Builds Skillscout for Linux and installs it: the GNOME app, the skillscout command, the Swift
 # runtime they link to, the desktop entry, the icons and the AppStream metadata.
 #
 #   Linux/scripts/install.sh                      installs into ~/.local
@@ -47,11 +47,11 @@ if [ -n "${STRIP:-}" ]; then
   strip --strip-unneeded "$dest/bin/skillscout" "$dest/bin/skillscout-gnome" "$runtime"/*.so*
 fi
 
-install -Dm644 Linux/com.flaviocopes.skillscout.desktop "$dest/share/applications/com.flaviocopes.skillscout.desktop"
-install -Dm644 Linux/com.flaviocopes.skillscout.metainfo.xml "$dest/share/metainfo/com.flaviocopes.skillscout.metainfo.xml"
-for icon in Linux/icons/*/com.flaviocopes.skillscout.png; do
+install -Dm644 Linux/io.github.eboye.skillscout.desktop "$dest/share/applications/io.github.eboye.skillscout.desktop"
+install -Dm644 Linux/io.github.eboye.skillscout.metainfo.xml "$dest/share/metainfo/io.github.eboye.skillscout.metainfo.xml"
+for icon in Linux/icons/*/io.github.eboye.skillscout.png; do
   size="$(basename "$(dirname "$icon")")"
-  install -Dm644 "$icon" "$dest/share/icons/hicolor/$size/apps/com.flaviocopes.skillscout.png"
+  install -Dm644 "$icon" "$dest/share/icons/hicolor/$size/apps/io.github.eboye.skillscout.png"
 done
 for icon in Linux/icons/scalable/actions/*.svg; do
   install -Dm644 "$icon" "$dest/share/icons/hicolor/scalable/actions/$(basename "$icon")"
@@ -61,4 +61,4 @@ if [ -z "${DESTDIR:-}" ]; then
   gtk-update-icon-cache -q -t "$prefix/share/icons/hicolor" 2>/dev/null || true
   update-desktop-database -q "$prefix/share/applications" 2>/dev/null || true
 fi
-echo "Installed Skill Cabinet in $dest"
+echo "Installed Skillscout in $dest"

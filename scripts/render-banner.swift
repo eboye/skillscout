@@ -7,7 +7,7 @@
 import AppKit
 import SwiftUI
 
-let name = "Skill Cabinet"
+let name = "Skillscout"
 let tagline = "Your agent skills in one place,\nand the ones you keep asking for."
 let chips = ["8 coding agents", "Usage counts", "Skill ideas"]
 let size = CGSize(width: 1280, height: 560)

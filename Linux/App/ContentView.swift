@@ -73,7 +73,7 @@ struct ContentView: View {
   var view: Body {
     NavigationSplitView {
       SidebarPane(store: store, model: model, app: app, skills: librarySkills, missing: librarySkills.count(where: isMissing), pairs: listedPairs.count)
-        .navigationTitle("Skill Cabinet")
+        .navigationTitle("Skillscout")
     } content: {
       NavigationSplitView {
         listPane
@@ -202,12 +202,12 @@ struct ContentView: View {
         }
         .tooltip("Uninstall the selected skill from every tool, by moving it to the Trash")
         .insensitive(actionSkill == nil)
-        Button(icon: .custom(name: "com.flaviocopes.skillscout-rename-symbolic")) {
+        Button(icon: .custom(name: "io.github.eboye.skillscout-rename-symbolic")) {
           store.renaming = actionSkill
         }
         .tooltip("Rename the selected skill")
         .insensitive(actionSkill == nil)
-        Button(icon: .custom(name: "com.flaviocopes.skillscout-edit-symbolic")) {
+        Button(icon: .custom(name: "io.github.eboye.skillscout-edit-symbolic")) {
           store.editing = actionSkill
         }
         .tooltip("Edit the selected skill's SKILL.md")
@@ -284,7 +284,7 @@ struct SidebarPane: View {
             }
             MenuButton("Keyboard Shortcuts") { model.showShortcuts = true }
               .keyboardShortcut("question".ctrl())
-            MenuButton("About Skill Cabinet") { model.showAbout = true }
+            MenuButton("About Skillscout") { model.showAbout = true }
           }
           MenuSection {
             MenuButton("Quit", window: false) { app.quit() }
@@ -294,9 +294,9 @@ struct SidebarPane: View {
         .primary()
         .tooltip("Main Menu")
       }
-      .headerBarTitle { WindowTitle(subtitle: "", title: "Skill Cabinet") }
+      .headerBarTitle { WindowTitle(subtitle: "", title: "Skillscout") }
     }
-    .navigationTitle("Skill Cabinet")
+    .navigationTitle("Skillscout")
   }
 
   private func section(_ title: String, _ entries: [Entry]) -> AnyView {
@@ -363,7 +363,7 @@ struct StatusPanel: View {
         Text(status).captionHeading()
       }
       .halign(.start)
-      paragraph("\(plural(store.prompts.count, "message")) in the last \(UserDefaults.standard.integer(forKey: "lookbackDays")) days")
+      paragraph("\(plural(store.prompts.count, "message")) in the last \(UserDefaults.app.integer(forKey: "lookbackDays")) days")
         .caption()
         .dimLabel()
       if !perTool.isEmpty {

@@ -22,7 +22,7 @@ check() {
   fi
 }
 check Linux/arch/PKGBUILD "$(sed -n 's/^pkgver=//p' Linux/arch/PKGBUILD)"
-check Linux/com.flaviocopes.skillscout.metainfo.xml "$(grep -o '<release version="[^"]*"' Linux/com.flaviocopes.skillscout.metainfo.xml | head -1 | cut -d'"' -f2)"
+check Linux/io.github.eboye.skillscout.metainfo.xml "$(grep -o '<release version="[^"]*"' Linux/io.github.eboye.skillscout.metainfo.xml | head -1 | cut -d'"' -f2)"
 check Linux/App/Dialogs.swift "$(sed -n 's/^let appVersion = "\(.*\)"/\1/p' Linux/App/Dialogs.swift)"
 
 release=1

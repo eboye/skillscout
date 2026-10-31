@@ -32,8 +32,8 @@ STRIP=1 SKIP_BUILD=1 PREFIX=/usr DESTDIR="$appdir" Linux/scripts/install.sh >/de
 export APPIMAGE_EXTRACT_AND_RUN=1 DEPLOY_GTK_VERSION=4 PATH="$tools:$PATH"
 "$linuxdeploy" --appdir "$appdir" --plugin gtk \
   --executable "$appdir/usr/bin/skillscout-gnome" --executable "$appdir/usr/bin/skillscout" \
-  --desktop-file "$appdir/usr/share/applications/com.flaviocopes.skillscout.desktop" \
-  --icon-file Linux/icons/256x256/com.flaviocopes.skillscout.png
+  --desktop-file "$appdir/usr/share/applications/io.github.eboye.skillscout.desktop" \
+  --icon-file Linux/icons/256x256/io.github.eboye.skillscout.png
 
 # The GTK plugin forces X11 and the Adwaita GTK theme, for GTK 3. GTK 4 runs on Wayland, and
 # libadwaita picks light or dark itself.

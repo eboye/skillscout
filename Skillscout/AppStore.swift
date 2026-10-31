@@ -7,7 +7,7 @@ final class AppStore {
   var skills: [Skill] = []
   var prompts: [Prompt] = []
   var usage: [Skill.ID: SkillUsage] = [:]
-  /// The tools you use, in `Tool.allCases` order. Skill Cabinet ignores the others.
+  /// The tools you use, in `Tool.allCases` order. Skillscout ignores the others.
   var tools: [Tool] = Tool.enabled
   var suggestions: [Suggestion] = []
   var explanations: [String: String] = [:]
@@ -64,7 +64,7 @@ final class AppStore {
   func start() async {
     guard !started else { return }
     started = true
-    UserDefaults.standard.register(defaults: ["lookbackDays": 60, "autoAnalyze": true, "autoThreshold": 40])
+    UserDefaults.app.register(defaults: ["lookbackDays": 60, "autoAnalyze": true, "autoThreshold": 40])
     loadState()
     await refreshSkills()
     await refreshPrompts()
@@ -78,7 +78,7 @@ final class AppStore {
 
   func setTool(_ tool: Tool, enabled: Bool) {
     tools = Tool.allCases.filter { $0 == tool ? enabled : tools.contains($0) }
-    UserDefaults.standard.set(tools.map(\.rawValue), forKey: "tools")
+    UserDefaults.app.set(tools.map(\.rawValue), forKey: "tools")
     applyTools()
   }
 
@@ -93,7 +93,7 @@ final class AppStore {
 
   func refreshPrompts() async {
     isLoadingPrompts = true
-    (allPrompts, uses) = await library.load(lookbackDays: UserDefaults.standard.integer(forKey: "lookbackDays"))
+    (allPrompts, uses) = await library.load(lookbackDays: UserDefaults.app.integer(forKey: "lookbackDays"))
     applyTools()
     isLoadingPrompts = false
     await maybeAnalyzeAutomatically()
@@ -158,7 +158,7 @@ final class AppStore {
   }
 
   private func maybeAnalyzeAutomatically() async {
-    let defaults = UserDefaults.standard
+    let defaults = UserDefaults.app
     guard defaults.bool(forKey: "autoAnalyze"),
           lastAnalysis != nil,
           newPromptCount >= defaults.integer(forKey: "autoThreshold"),

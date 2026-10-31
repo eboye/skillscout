@@ -1,7 +1,8 @@
 import Foundation
 
 // Read the app's settings: enabled tools, lookback window and AI engine.
-UserDefaults.standard.addSuite(named: "com.flaviocopes.skillscout")
+AppID.adoptFormerData()
+UserDefaults.standard.addSuite(named: AppID.current)
 
 struct Arguments {
   var command: String?
@@ -47,7 +48,7 @@ struct Arguments {
 
   var days: Int {
     if let days = options["days"].flatMap(Int.init) { return days }
-    let saved = UserDefaults.standard.integer(forKey: "lookbackDays")
+    let saved = UserDefaults.app.integer(forKey: "lookbackDays")
     return saved > 0 ? saved : 60
   }
 
@@ -93,7 +94,7 @@ struct Arguments {
       guard let kind = AIEngineKind(rawValue: name.lowercased()) else {
         throw CLIError(message: "--engine takes codex or claude.", usage: true)
       }
-      let saved = UserDefaults.standard.string(forKey: kind.modelKey).flatMap { $0.isEmpty ? nil : $0 }
+      let saved = UserDefaults.app.string(forKey: kind.modelKey).flatMap { $0.isEmpty ? nil : $0 }
       engine = AIEngine(kind: kind, model: saved ?? kind.defaultModel)
     }
     if let model = options["model"] {
@@ -127,7 +128,7 @@ enum Command: String, CaseIterable {
     case .list: "List your skills and the tools that load them"
     case .show: "Where a skill lives, which tools see it, and its usage"
     case .usage: "Rank skills by how many chats used them"
-    case .tools: "The agent tools Skill Cabinet knows about"
+    case .tools: "The agent tools Skillscout knows about"
     case .similar: "Pairs of skills that read alike"
     case .add: "Add a skill to another tool"
     case .rename: "Give a skill a new name"
@@ -147,7 +148,7 @@ enum Command: String, CaseIterable {
     case .usage:
       "Ranks skills by the number of chats that used them. A use is a chat where the agent read the skill's SKILL.md, or where you attached or invoked the skill yourself."
     case .tools:
-      "Lists the agent tools Skill Cabinet knows, whether they're on, and where each one keeps its skills. Turn tools on or off in the app's settings."
+      "Lists the agent tools Skillscout knows, whether they're on, and where each one keeps its skills. Turn tools on or off in the app's settings."
     case .similar:
       "Compares the words your skills use, on your Mac and without AI, and lists the pairs that read alike, so you can merge them. Pairs you dismissed in the app stay hidden."
     case .rename:
@@ -155,7 +156,7 @@ enum Command: String, CaseIterable {
     case .merge:
       "Asks AI to write one SKILL.md from two skills, and makes it the SKILL.md of the first one. The old SKILL.md and the other skill go to the Trash, and the first skill gets linked wherever the other one was, so no tool loses it. The other skill's files come along, unless the first one has a file at the same path."
     case .add:
-      "Makes a skill available in another tool. Skill Cabinet links the skill folder into that tool's skills folder, so an edit shows up everywhere. Plugin skills get copied instead, since plugin updates replace their folders."
+      "Makes a skill available in another tool. Skillscout links the skill folder into that tool's skills folder, so an edit shows up everywhere. Plugin skills get copied instead, since plugin updates replace their folders."
     case .uninstall:
       "Moves every copy of a skill in your skills folders to the Trash, so you can put it back from there. A link goes on its own, and the folder it points to stays. Plugin and built-in copies stay too, since their tools manage them."
     case .suggest:
@@ -228,7 +229,7 @@ enum Command: String, CaseIterable {
 func printHelp(_ command: Command?) {
   let bold = Terminal.bold
   guard let command else {
-    print(Terminal.wrap("Skill Cabinet finds the skills your coding agents load, shows which tools can use each one, and counts how often you use them."))
+    print(Terminal.wrap("Skillscout finds the skills your coding agents load, shows which tools can use each one, and counts how often you use them."))
     print()
     print("\(bold("Usage:")) skillscout [command] [options]")
     print()
@@ -265,7 +266,7 @@ func printCapabilities(json: Bool) throws {
   let manifest: [String: Any] = [
     "name": "skillscout",
     "version": version,
-    "summary": "Browse and manage coding-agent skills with Skill Cabinet.",
+    "summary": "Browse and manage coding-agent skills with Skillscout.",
     "capabilities": [
       ["description": "List skills and which coding agents can load them", "command": "skillscout list --json"],
       ["description": "Show a skill and its usage", "command": "skillscout show flavioify --json"],

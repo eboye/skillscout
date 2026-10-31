@@ -46,7 +46,7 @@ struct AIEngine: Sendable {
   }
 
   static var current: AIEngine {
-    let defaults = UserDefaults.standard
+    let defaults = UserDefaults.app
     let kind = AIEngineKind(rawValue: defaults.string(forKey: "engine") ?? "") ?? .codex
     let model = defaults.string(forKey: kind.modelKey).flatMap { $0.isEmpty ? nil : $0 } ?? kind.defaultModel
     return AIEngine(kind: kind, model: model)

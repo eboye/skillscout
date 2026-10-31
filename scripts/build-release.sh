@@ -1,19 +1,19 @@
 #!/bin/sh
-# Builds a universal (Apple silicon and Intel) Skill Cabinet.app, with the skillscout command
+# Builds a universal (Apple silicon and Intel) Skillscout.app, with the skillscout command
 # inside. Signs with Flavio's Developer ID when the certificate is in the keychain, ad hoc
 # everywhere else (CI, forks). Developer ID builds are notarized, stapled, and zipped into
-# dist/Skill-Cabinet-<version>.zip. The name and version come from project.yml.
+# dist/Skillscout-<version>.zip. The name and version come from project.yml.
 # Usage: scripts/build-release.sh
 set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 cd "$ROOT"
-NAME="Skill Cabinet"
+NAME="Skillscout"
 TARGET="Skillscout"
 VERSION=$(sed -n 's/^ *MARKETING_VERSION: "\(.*\)"$/\1/p' project.yml)
 BUILD="$ROOT/build/release"
 APP="$BUILD/Release/$NAME.app"
-ZIP="$ROOT/dist/Skill-Cabinet-$VERSION.zip"
+ZIP="$ROOT/dist/Skillscout-$VERSION.zip"
 CHECK=$(mktemp -d)
 
 cleanup() {
@@ -67,8 +67,11 @@ mkdir -p dist
 xcodebuild -project "$TARGET.xcodeproj" -target "$TARGET" -configuration Release \
   ARCHS="arm64 x86_64" ONLY_ACTIVE_ARCH=NO SYMROOT="$BUILD" -quiet build
 
-lipo "$APP/Contents/MacOS/$NAME" -verify_arch arm64 x86_64
-lipo "$APP/Contents/Helpers/skillscout" -verify_arch arm64 x86_64
+# One architecture at a time: newer lipo takes only one after -verify_arch.
+for arch in arm64 x86_64; do
+  lipo "$APP/Contents/MacOS/$NAME" -verify_arch "$arch"
+  lipo "$APP/Contents/Helpers/skillscout" -verify_arch "$arch"
+done
 
 IDENTITY=$(security find-identity -v -p codesigning | awk '/"Developer ID Application: Flavio Copes \(DGFKNTAG99\)"/ { print $2; exit }')
 if [ -n "$IDENTITY" ]; then

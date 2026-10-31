@@ -10,6 +10,7 @@ let fakeHome: URL = {
   try! FileManager.default.createDirectory(at: home, withIntermediateDirectories: true)
   setenv("HOME", home.path, 1)
   setenv("XDG_DATA_HOME", home.appending(path: ".local/share").path, 1)
+  setenv("XDG_CONFIG_HOME", home.appending(path: ".config").path, 1)
   unsetenv("FLATPAK_ID")
   return home
 }()
@@ -251,5 +252,62 @@ extension DiskTests {
     #expect(usage.lastUsed == late)
     #expect(usage.topProjects == ["api", "web"])
     #expect(SkillUsage.tally(uses, skills: skills)["ship-it"]?.chats == 1)
+  }
+}
+
+extension DiskTests {
+  func writeSettings(_ settings: [String: Any], to relative: String) throws {
+    let url = fakeHome.appending(path: relative)
+    try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+    try PropertyListSerialization.data(fromPropertyList: settings, format: .xml, options: 0).write(to: url)
+  }
+
+  @Test func adoptsTheFormerSettings() throws {
+    _ = try freshHome()
+    try writeSettings(["tools": ["claude", "codex"]], to: ".config/\(AppID.former).plist")
+
+    AppID.adoptFormerData()
+    #expect(exists(".config/\(AppID.current).plist"))
+    // UserDefaults itself can't be checked here: CoreFoundation took the environment when the test
+    // process started, so it still looks at the real ~/.config. Never write settings from a test.
+
+    // A second start leaves the new settings alone.
+    try writeSettings(["tools": ["amp"]], to: ".config/\(AppID.former).plist")
+    AppID.adoptFormerData()
+    let kept = try Data(contentsOf: fakeHome.appending(path: ".config/\(AppID.current).plist"))
+    let settings = try PropertyListSerialization.propertyList(from: kept, format: nil) as? [String: Any]
+    #expect(settings?["tools"] as? [String] == ["claude", "codex"])
+  }
+
+  @Test func flatpakAdoptsTheFormerSandbox() throws {
+    _ = try freshHome()
+    let sandbox = ".var/app/\(AppID.former)"
+    try writeSettings(["engine": "claude"], to: "\(sandbox)/config/\(AppID.former).plist")
+    try FileManager.default.createDirectory(at: fakeHome.appending(path: "\(sandbox)/data/skillscout"), withIntermediateDirectories: true)
+    try "{}".write(to: fakeHome.appending(path: "\(sandbox)/data/skillscout/state.json"), atomically: true, encoding: .utf8)
+    try FileManager.default.createDirectory(at: Paths.appSupport, withIntermediateDirectories: true)
+    try FileManager.default.createDirectory(at: fakeHome.appending(path: ".local/bin"), withIntermediateDirectories: true)
+    let wrapper = "#!/bin/sh\nexec flatpak run --command=skillscout \(AppID.former) \"$@\"\n"
+    try wrapper.write(to: fakeHome.appending(path: ".local/bin/skillscout"), atomically: true, encoding: .utf8)
+
+    setenv("FLATPAK_ID", AppID.current, 1)
+    defer { unsetenv("FLATPAK_ID") }
+    AppID.adoptFormerData()
+
+    #expect(exists(".config/\(AppID.current).plist"))
+    #expect(FileManager.default.fileExists(atPath: Paths.appSupport.appending(path: "state.json").path))
+    let script = try String(contentsOf: fakeHome.appending(path: ".local/bin/skillscout"), encoding: .utf8)
+    #expect(script.contains("flatpak run --command=skillscout \(AppID.current) "))
+    #expect(!script.contains(AppID.former))
+  }
+
+  @Test func outsideTheFlatpakTheDataStaysPut() throws {
+    _ = try freshHome()
+    try FileManager.default.createDirectory(at: fakeHome.appending(path: ".var/app/\(AppID.former)/data/skillscout"), withIntermediateDirectories: true)
+    try "{}".write(to: fakeHome.appending(path: ".var/app/\(AppID.former)/data/skillscout/state.json"), atomically: true, encoding: .utf8)
+    try FileManager.default.createDirectory(at: Paths.appSupport, withIntermediateDirectories: true)
+
+    AppID.adoptFormerData()
+    #expect(!FileManager.default.fileExists(atPath: Paths.appSupport.appending(path: "state.json").path))
   }
 }

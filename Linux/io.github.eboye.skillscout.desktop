@@ -1,11 +1,12 @@
 [Desktop Entry]
 Type=Application
-Name=Skill Cabinet
+Name=Skillscout
 GenericName=Agent Skills
 Comment=Find the skills your coding agents load, see which agents can use each one, and count how often you use them
 Exec=skillscout-gnome
-Icon=com.flaviocopes.skillscout
+Icon=io.github.eboye.skillscout
 Terminal=false
 Categories=Development;GTK;
 Keywords=skills;agents;claude;codex;cursor;gemini;opencode;AI;
 StartupNotify=true
+X-Flatpak-RenamedFrom=com.flaviocopes.skillscout.desktop;

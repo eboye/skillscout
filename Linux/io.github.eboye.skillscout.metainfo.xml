@@ -1,18 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.flaviocopes.skillscout</id>
-  <name>Skill Cabinet</name>
+  <id>io.github.eboye.skillscout</id>
+  <name>Skillscout</name>
   <summary>See the skills your coding agents load</summary>
-  <developer id="com.flaviocopes">
-    <name>Flavio Copes</name>
+  <developer id="io.github.eboye">
+    <name>eboye</name>
   </developer>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <description>
     <p>
-      Skill Cabinet finds every skill your coding agents load, shows which agents can see each one,
+      Skillscout finds every skill your coding agents load, shows which agents can see each one,
       and counts how often you use them. It knows Cursor, Claude Code, Codex, Gemini CLI, OpenCode,
       Droid, Pi and Amp.
+    </p>
+    <p>
+      Skillscout is a fork of Skill Cabinet 1.5.0 by Flavio Copes, released under the MIT license.
     </p>
     <ul>
       <li>Add a skill to the agents that miss it with one click</li>
@@ -21,9 +24,12 @@
       <li>Find the requests you keep typing, and turn them into new skills with AI</li>
     </ul>
   </description>
-  <launchable type="desktop-id">com.flaviocopes.skillscout.desktop</launchable>
-  <url type="homepage">https://flaviocopes.com/skill-cabinet/</url>
+  <launchable type="desktop-id">io.github.eboye.skillscout.desktop</launchable>
+  <url type="homepage">https://github.com/eboye/skillscout</url>
   <url type="bugtracker">https://github.com/eboye/skillscout/issues</url>
+  <replaces>
+    <id>com.flaviocopes.skillscout</id>
+  </replaces>
   <provides>
     <binary>skillscout</binary>
     <binary>skillscout-gnome</binary>

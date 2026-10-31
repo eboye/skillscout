@@ -14,11 +14,11 @@ final class WindowModel {
   var selectedSuggestion = ""
   var selectedPair = ""
   var search = ""
-  var source = SkillSource(rawValue: UserDefaults.standard.string(forKey: "skillSource") ?? "") ?? .yours {
-    didSet { UserDefaults.standard.set(source.rawValue, forKey: "skillSource") }
+  var source = SkillSource(rawValue: UserDefaults.app.string(forKey: "skillSource") ?? "") ?? .yours {
+    didSet { UserDefaults.app.set(source.rawValue, forKey: "skillSource") }
   }
-  var sort = SkillSort(rawValue: UserDefaults.standard.string(forKey: "skillSort") ?? "") ?? .newest {
-    didSet { UserDefaults.standard.set(sort.rawValue, forKey: "skillSort") }
+  var sort = SkillSort(rawValue: UserDefaults.app.string(forKey: "skillSort") ?? "") ?? .newest {
+    didSet { UserDefaults.app.set(sort.rawValue, forKey: "skillSort") }
   }
 
   /// On a narrow window the panes stack, and these say which one is on top.

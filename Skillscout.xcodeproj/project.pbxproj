@@ -305,15 +305,15 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Skill Cabinet";
+				INFOPLIST_KEY_CFBundleDisplayName = Skillscout;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.flaviocopes.skillscout;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.eboye.skillscout;
 				PRODUCT_MODULE_NAME = Skillscout;
-				PRODUCT_NAME = "Skill Cabinet";
+				PRODUCT_NAME = Skillscout;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -332,7 +332,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.flaviocopes.skillscout.cli;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.eboye.skillscout.cli;
 				PRODUCT_NAME = skillscout;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
@@ -407,15 +407,15 @@
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Skill Cabinet";
+				INFOPLIST_KEY_CFBundleDisplayName = Skillscout;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.flaviocopes.skillscout;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.eboye.skillscout;
 				PRODUCT_MODULE_NAME = Skillscout;
-				PRODUCT_NAME = "Skill Cabinet";
+				PRODUCT_NAME = Skillscout;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -434,7 +434,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.flaviocopes.skillscout.cli;
+				PRODUCT_BUNDLE_IDENTIFIER = io.github.eboye.skillscout.cli;
 				PRODUCT_NAME = skillscout;
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
